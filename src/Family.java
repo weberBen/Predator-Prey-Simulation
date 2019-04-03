@@ -75,6 +75,16 @@ public class Family extends Group
 		specie = headForFood.getSpecie();
 	}
 	
+	public void decreaseEnergy(double ep)
+	{
+		headForFood.decreaseEnergy(ep);
+		headForChildren.decreaseEnergy(ep);
+		for(Animal a : children)
+		{
+			a.decreaseEnergy(ep);
+		}
+	}
+	
 	
 	//extends
 	public void setNeedsToEat()
@@ -104,13 +114,8 @@ public class Family extends Group
 		//if the animal need to eat, then the value of the need will be negative, so we use the absolute value of the sum
 	}
 	
-	public void decreaseEnergy(double ep)
+	public int getSize()
 	{
-		headForFood.decreaseEnergy(ep);
-		headForChildren.decreaseEnergy(ep);
-		for(Animal a : children)
-		{
-			a.decreaseEnergy(ep);
-		}
+		return 2+children.size();
 	}
 }

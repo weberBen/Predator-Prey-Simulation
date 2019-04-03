@@ -29,6 +29,11 @@ public abstract class Group implements I_Living
 		return (type==Parms.TYPE_PACK);
 	}
 	
+	public boolean isHerd()
+	{
+		return (type==Parms.TYPE_HERD);
+	}
+	
 	public double getStrength()
 	{
 		return strength;
@@ -60,4 +65,5 @@ public abstract class Group implements I_Living
 	}
 	
 	public abstract void setNeedsToEat();	
+	public abstract int getSize();
 }
