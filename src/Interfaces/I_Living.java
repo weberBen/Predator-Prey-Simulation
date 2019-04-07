@@ -1,3 +1,4 @@
+package Interfaces;
 
 public interface I_Living 
 {
@@ -7,9 +8,11 @@ public interface I_Living
 	public double getAgressivity();
 	public String getSpecie();
 	
-	public double getNeedsToEat();
 	public void decreaseEnergy(double ep);
 	
+	public double getNeedsToEat();
 	public boolean needToEat();
 	
+	public boolean isHerbivorous();
+	public boolean isCarnivorous();
 }

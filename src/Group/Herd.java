@@ -1,4 +1,8 @@
+package Group;
 import java.util.ArrayList;
+
+import Animal.Animal;
+import Parameters.Parms;
 
 public class Herd extends Group
 {
@@ -164,6 +168,16 @@ public class Herd extends Group
 		
 		return Math.abs(output);
 		//if the animal need to eat, then the value of the need will be negative, so we use the absolute value of the sum
+	}
+	
+	public boolean isCarnivorous()
+	{
+		return members.get(0).isCarnivorous();
+	}
+	
+	public boolean isHerbivorous()
+	{
+		return members.get(0).isHerbivorous();
 	}
 	
 	public void interact(Group p)

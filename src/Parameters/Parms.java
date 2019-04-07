@@ -1,3 +1,5 @@
+package Parameters;
+import Group.Group;
 
 public final class Parms 
 {
@@ -8,6 +10,10 @@ public final class Parms
 	public static final double FACTOR_ORGANIZATION_HERD = 0.5;
 	
 	public static final double hungerThreshold = 0.5;
+	
+	public static final double DISTANCE_NEIGHBOOR = 1;
+	
+	public static final double DIM_CELL = 2;
 	
 	private Parms(){}
 	
@@ -32,6 +38,11 @@ public final class Parms
 		mu = 0.1;
 		
 		return Math.exp(-lambda*number_element) + mu;
+	}
+	
+	public static double distance(Group p, Group p2)
+	{
+		return 0;
 	}
 	
 }

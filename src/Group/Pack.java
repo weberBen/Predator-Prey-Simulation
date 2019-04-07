@@ -1,4 +1,8 @@
+package Group;
 import java.util.ArrayList;
+
+import Animal.Animal;
+import Parameters.Parms;
 
 public class Pack extends Group
 {
@@ -87,7 +91,8 @@ public class Pack extends Group
 			if(o.isFamily())
 			{
 				Family f = (Family)o;
-				chief = f.getHeadForFood();
+				Animal a = f.getFather().getChief();
+				chief = a;
 			}else if(o.isAnimal())
 			{
 				Pack p = (Pack)o;
@@ -112,7 +117,7 @@ public class Pack extends Group
 		}
 	}
 	
-	private void setDeathForChief() throws IllegalArgumentException
+	public void setDeathForChief() throws IllegalArgumentException
 	{
 		chief = null;
 		if(others.size()>0)//set the new chief as the animal with the highest strength
@@ -145,7 +150,8 @@ public class Pack extends Group
 			if(o.isFamily())
 			{
 				Family f = (Family)o;
-				chief = f.getHeadForFood();
+				Animal a = f.getFather().getChief();
+				chief = a;
 			}else if(o.isAnimal())
 			{
 				Pack p = (Pack)o;
@@ -155,7 +161,7 @@ public class Pack extends Group
 		}
 	}
 	
-	private void setDeathForMember(Animal a)
+	public void setDeathForMember(Animal a)
 	{
 		others.remove(a);
 	}
@@ -306,4 +312,15 @@ public class Pack extends Group
 	{
 		
 	}
+	
+	public boolean isCarnivorous()
+	{
+		return chief.isCarnivorous();
+	}
+	
+	public boolean isHerbivorous()
+	{
+		return chief.isHerbivorous();
+	}
+	
 }
