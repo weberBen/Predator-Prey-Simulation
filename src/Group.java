@@ -2,12 +2,6 @@
 public abstract class Group implements I_Living
 {
 	private final int type;
-	protected double needsToEat;
-	protected double sociability;
-	protected double agressivity;
-	protected double agility;
-	protected double strength;
-	protected String specie;
 	
 	public Group(int type)
 	{
@@ -34,36 +28,13 @@ public abstract class Group implements I_Living
 		return (type==Parms.TYPE_HERD);
 	}
 	
-	public double getStrength()
+	public boolean isAnimal()
 	{
-		return strength;
+		return isPack() && getSize()==1;
 	}
 	
-	public double getAgility()
-	{
-		return agility;
-	}
-	
-	public double getAgressivity()
-	{
-		return agressivity;
-	}
-	
-	public double getSociability()
-	{
-		return sociability;
-	}
-	
-	public String getSpecie()
-	{
-		return specie;
-	}
-	
-	public double getNeedsToEat()
-	{
-		return needsToEat;
-	}
-	
-	public abstract void setNeedsToEat();	
+	public abstract double getNeedsToEat();	
 	public abstract int getSize();
+	public abstract void setDeath(Animal a);	
+	public abstract void interact(Group p);
 }

@@ -3,35 +3,37 @@ import java.util.ArrayList;
 public class Pack extends Group
 {
 	private Animal chief;
-	private ArrayList<Object> others;
+	private ArrayList<Group> others;
 	
 	public Pack()
 	{
 		super(Parms.TYPE_PACK);
 		chief = null;
-		others = new ArrayList<Object>();
+		others = new ArrayList<Group>();
+	}
+	
+	public Pack(Animal a)//a single animal is consider as a pack of one animal
+	{
+		this();
+		chief = a;
 	}
 	
 	public int getSize() throws IllegalArgumentException
 	{
 		int count = 0;
-		for(Object o : others)
+		for(Group o : others)
 		{
 			//only single animal and family can be a member of the pack
-			if(o instanceof Animal)
+			if(o.isAnimal() || o.isFamily())
 			{
-				count++;
-			}else if(o instanceof Family)
-			{
-				Family f = (Family)o;
-				count+=f.getSize();
+				count+=o.getSize();
 			}else
 			{
 				throw new IllegalArgumentException("Le membre de la meute n'est pas reconnu comme type autorisé");
 			}
 		}
 		
-		return 1+count;
+		return (chief!=null)?1:0 +count;
 	}
 	
 	
@@ -47,14 +49,20 @@ public class Pack extends Group
 	}
 	
 	//the others
-	public void setOthers(ArrayList<Object> l)
-	{
-		others = new ArrayList<Object>(l);
-	}
-	
 	public void addMember(Animal a)
 	{
-		double s1 = a.getStrength();
+		addMember(new Pack(a));
+	}
+	
+	
+	public void addMember(Group o) throws IllegalArgumentException
+	{
+		if(!(o.isAnimal() || o.isFamily()))
+		{
+			throw new IllegalArgumentException("Le membre de la meute n'est pas reconnu comme type autorisé");
+		}
+		
+		double s1 = o.getStrength();
 		double s2 = (chief==null)?0:chief.getStrength();
 		boolean replaceChief = false;
 		
@@ -76,17 +84,225 @@ public class Pack extends Group
 		if(replaceChief)
 		{
 			Animal temp = chief;
-			chief = a;
-			others.add(temp);
+			if(o.isFamily())
+			{
+				Family f = (Family)o;
+				chief = f.getHeadForFood();
+			}else if(o.isAnimal())
+			{
+				Pack p = (Pack)o;
+				chief = p.getChief();
+			}
+			others.add(new Pack(temp));
 		}else
 		{
-			others.add(a);
+			others.add(o);
 		}
 	}
 	
 	
+	public void setDeath(Animal a)
+	{
+		if(a.equals(chief))
+		{
+			setDeathForChief();
+		}else
+		{
+			setDeathForMember(a);
+		}
+	}
+	
+	private void setDeathForChief() throws IllegalArgumentException
+	{
+		chief = null;
+		if(others.size()>0)//set the new chief as the animal with the highest strength
+		{
+			//fin the animal with the highest strength
+			int index = 0;
+			double max_strength = -1;
+			double temp;
+			Group o;
+			
+			for(int i=0; i<others.size(); i++)
+			{
+				o = others.get(i);
+				if(o.isAnimal() || o.isFamily())
+				{
+					if((temp = o.getStrength())>max_strength)
+					{
+						index = i;
+						max_strength = temp;
+					}
+				}else
+				{
+					throw new IllegalArgumentException("Le membre de la meute n'est pas reconnu comme type autorisé");
+				}
+			}
+			
+			
+			//set the new chief
+			o = others.get(index);
+			if(o.isFamily())
+			{
+				Family f = (Family)o;
+				chief = f.getHeadForFood();
+			}else if(o.isAnimal())
+			{
+				Pack p = (Pack)o;
+				chief = p.getChief();
+			}
+			others.remove(index);
+		}
+	}
+	
+	private void setDeathForMember(Animal a)
+	{
+		others.remove(a);
+	}
+
+	
 	//implement
-	public void setSociability()
+	public double getStrength() throws IllegalArgumentException
+	{
+		double res = (chief!=null)?(chief.getStrength()):0;
+		for(Group o : others)
+		{
+			if(o.isFamily() || o.isAnimal())
+			{
+				res+=o.getStrength();
+			}else
+			{
+				throw new IllegalArgumentException("Le membre de la meute n'est pas reconnu comme type autorisé"); 
+			}
+		}
+		
+		return res;
+	}
+	
+	public double getAgility() throws IllegalArgumentException
+	{
+		double res = (chief!=null)?(chief.getAgility()):0;
+		
+		for(Group o : others)
+		{
+			if(o.isFamily() || o.isAnimal())
+			{
+				res+=o.getAgility();
+			}else
+			{
+				throw new IllegalArgumentException("Le membre de la meute n'est pas reconnu comme type autorisé"); 
+			}
+		}
+		
+		return res/( ((chief!=null)?1:0) + others.size());
+	}
+	
+	
+	public double getAgressivity() throws IllegalArgumentException
+	{
+		double res = (chief!=null)?(chief.getAgressivity()):0;
+		
+		for(Group o : others)
+		{
+			if(o.isFamily() || o.isAnimal())
+			{
+				res+=o.getAgressivity();
+			}else
+			{
+				throw new IllegalArgumentException("Le membre de la meute n'est pas reconnu comme type autorisé"); 
+			}
+		}
+		
+		return res/( ((chief!=null)?1:0) + others.size());
+	}
+	
+	public double getSociability()
+	{
+		return Parms.sociabilityPack(getSize());
+	}
+	
+	
+	public String getSpecie() throws IllegalArgumentException
+	{
+		String specie = null;
+		if(others.size()>0)
+		{
+			specie = others.get(0).getSpecie();
+			for(Group o : others)
+			{
+				if(o.isFamily() || o.isAnimal())
+				{
+					if(!specie.equals(o.getSpecie()))
+					{
+						return null;
+					}
+				}else
+				{
+					throw new IllegalArgumentException("Le membre de la meute n'est pas reconnu comme type autorisé"); 
+				}
+			}
+		}
+		
+		if(chief!=null)
+		{
+			if(specie==null)//the pack is only composed by one animal
+			{
+				return chief.getSpecie();
+			}else if(!specie.equals(chief.getSpecie()))
+			{
+				return null;
+			}
+		}
+		
+		return null;
+	}
+	
+	
+	public void decreaseEnergy(double ep)
+	{
+		if(chief!=null)
+		{
+			chief.decreaseEnergy(ep);
+		}
+		
+		for(Group o : others)
+		{
+			o.decreaseEnergy(ep);
+		}
+	}
+	
+	public boolean needToEat()
+	{
+		return chief.needToEat();
+	}
+	
+	public double getNeedsToEat() throws IllegalArgumentException
+	{
+		double output = 0;
+		
+		//check if each animal need to eat, if so, add the amount of needs to the sum
+		if(chief.needToEat())
+		{
+			output+=chief.getNeedsToEat();
+		}
+		
+		
+		for(Group o : others)
+		{
+			if(o.isFamily() || o.isAnimal())
+			{
+				output+=o.getNeedsToEat();//if the group does not need to eat return 0
+			}else
+			{
+				throw new IllegalArgumentException("Le membre de la meute n'est pas reconnu comme type autorisé"); 
+			}
+		}
+		
+		return Math.abs(output);
+		//if the animal need to eat, then the value of the need will be negative, so we use the absolute value of the sum
+	}
+	
+	public void interact(Group p)
 	{
 		
 	}

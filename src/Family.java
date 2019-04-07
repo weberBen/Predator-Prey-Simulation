@@ -18,6 +18,7 @@ public class Family extends Group
 	//animal in charge of food
 	public void setHeadForFood(Animal a)
 	{
+		a.setGroup(this);
 		headForFood = a;
 	}
 	
@@ -29,6 +30,7 @@ public class Family extends Group
 	//animal in charge of children
 	public void setHeadForChildren(Animal a)
 	{
+		a.setGroup(this);
 		headForChildren = a;
 	}
 	
@@ -40,45 +42,48 @@ public class Family extends Group
 	//children
 	public void addChildren(Animal a)
 	{
+		a.setGroup(this);
 		children.add(a);
 	}
 	
-	public void setChildren(ArrayList<Animal> l)
-	{
-		children = new ArrayList<Animal>(l);
-	}
-	
-	
 	//implement interface
-	public void setStrength()
+	public double getStrength()
 	{
-		strength = headForFood.getStrength();
+		return headForFood.getStrength();
 	}
 	
-	public void setSociability()
+	public double getSociability()
 	{
-		sociability = headForFood.getSociability();
+		return headForFood.getSociability();
 	}
 	
-	public void setAgility()
+	public double getAgility()
 	{
-		agility = headForFood.getAgility();
+		return headForFood.getAgility();
 	}
 	
-	public void setAgresivity()
+	public double getAgressivity()
 	{
-		agressivity = headForFood.getAgressivity();
+		return headForFood.getAgressivity();
 	}
 	
-	public void setSpecie()
+	public String getSpecie()
 	{
-		specie = headForFood.getSpecie();
+		return headForFood.getSpecie();
 	}
 	
 	public void decreaseEnergy(double ep)
 	{
-		headForFood.decreaseEnergy(ep);
-		headForChildren.decreaseEnergy(ep);
+		if(headForFood!=null)
+		{
+			headForFood.decreaseEnergy(ep);
+		}
+		
+		if(headForChildren!=null)
+		{
+			headForChildren.decreaseEnergy(ep);
+		}
+		
 		for(Animal a : children)
 		{
 			a.decreaseEnergy(ep);
@@ -87,35 +92,85 @@ public class Family extends Group
 	
 	
 	//extends
-	public void setNeedsToEat()
+	public boolean needToEat()
+	{
+		return Parms.AnimalNeedToEat(getNeedsToEat());
+	}
+	
+	public double getNeedsToEat()
 	{
 		double output = 0;
 		
 		//check if each animal need to eat, if so, add the amount of needs to the sum
-		if(Parms.AnimalNeedToEat(headForFood))
+		if(headForFood.needToEat())
 		{
 			output+=headForFood.getNeedsToEat();
 		}
 		
-		if(Parms.AnimalNeedToEat(headForChildren))
+		if(headForChildren.needToEat())
 		{
 			output+=headForChildren.getNeedsToEat();
 		}
 		
 		for(Animal a : children)
 		{
-			if(Parms.AnimalNeedToEat(a))
+			if(a.needToEat())
 			{
 				output+=a.getNeedsToEat();
 			}
 		}
 		
-		needsToEat = Math.abs(output);
+		return Math.abs(output);
 		//if the animal need to eat, then the value of the need will be negative, so we use the absolute value of the sum
+	}
+	
+	public void setDeath(Animal a)
+	{
+		if(a.equals(headForFood))
+		{
+			setDeathHeadForFood();
+		}else if(a.equals(headForChildren))
+		{
+			setDeathHeadForChildren();
+		}else
+		{
+			setDeathForChild(a);
+		}
+	}
+	
+	private void setDeathHeadForFood()
+	{
+		if(headForChildren != null)
+		{
+			headForFood = headForChildren;
+			headForChildren = null;
+		}else
+		{
+			if(children.size()>0)
+			{
+				headForFood = children.get(0);
+				children.remove(0);
+			}
+		}
+	}
+	
+	private void setDeathHeadForChildren()
+	{
+		headForChildren = null;
+	}
+	
+	private void setDeathForChild(Animal a)
+	{
+		children.remove(a);
 	}
 	
 	public int getSize()
 	{
-		return 2+children.size();
+		return ((headForFood!=null)?1:0) + ((headForChildren!=null)?1:0)  + children.size();
+	}
+	
+	public void interact(Group p)
+	{
+		
 	}
 }
