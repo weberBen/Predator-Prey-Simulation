@@ -8,90 +8,93 @@ import Parameters.Parms;
 
 public abstract class Cell extends ObjectMap
 {
-	protected double rigidity;
-	protected double height;
-	protected double length;
-	protected ArrayList<Group> animals;
+	private double quantity;
+	/*Représente l'énergie disponible sur la case comme nourriture*/
+	private ArrayList<Group> animals;
+	private ArrayList<Obstacle> obstacles;
 	
-	public Cell(double rigidity, double height, double length)
+	/* Toutes les cases sont potentiellement de la nourriture végétale avec des obstacles dessus
+	 * Et la quantity de nourriture végétale sur une case est uniforme
+	 */
+	public Cell(double quantity)
 	{
-		this.rigidity = rigidity;
-		this.height = height;
-		this.length = length;
+		this.quantity =  quantity;
 		this.animals = new ArrayList<Group> ();
+		this.obstacles = new ArrayList<Obstacle>();
 	}
+	
 	public Cell()
 	{
-		this(0,0,0);
+		this(0);
 	}
 	
-	public double getRigidity()
-	{
-		return rigidity;
-	}
-	
-	public void setRigidity(double r)
-	{
-		rigidity = r;
-	}
-	
-	public double getHeight()
-	{
-		return height;
-	}
-	
-	public void setHeight(double h)
-	{
-		height = h;
-	}
-	
-	
-	public double getLength()
-	{
-		return length;
-	}
-	
-	public void setLength(double l)
-	{
-		length = l;
-	}
-	
-	
-	public void add(Group o)
+	public void addAnimals(Group o)
 	{
 		animals.add(o);
 	}
 	
-	public void remove(Group o)
+	public void removeAnimals(Group o)
 	{
 		animals.remove(o);
 	}
 	
-	public boolean canBeCircled(Group o)
+	public void addObstacle(Obstacle o)
 	{
-		if(length<Parms.DIM_CELL)
-		{
-			return true;
-		}else if(rigidity<o.getStrength() && o.getAgressivity()>0.5)
-		{
-			return true;
-		}else if(o.getAgility()>0.5)
-		{
-			return true;
-		}else if(o instanceof Pack)
-		{
-			Pack p =(Pack)o;
-			Animal a = p.getChief();
-			if(a.getHeight()*a.getStrength()>=height)
-			{
-				return true;
-			}
-		}
-		
-		return false;
+		obstacles.add(o);
 	}
 	
-	public boolean eatable(Group o)
+	public void removeObstacle(Obstacle o)
+	{
+		obstacles.remove(o);
+	}
+	
+	public void setQuantity(double quantity)
+	{
+		this.quantity = quantity;
+	}
+	
+	public double getQuantity()
+	{
+		return quantity;
+	}
+	
+	public void decreaseQuantity(double ep)
+	{
+		quantity-=ep;
+		if(quantity<0)
+		{
+			quantity=0;
+		}
+	}
+	
+	public double getFood(double needs)
+	{
+		double food;
+		if(quantity<=needs)
+		{
+			food = quantity;
+			quantity = 0;
+		}else
+		{
+			food = needs;
+			quantity = quantity - needs;
+		}
+		
+		return food;
+	}
+	
+	public void deviateAnimal(Animal o)
+	{
+		/* regarder la posiiton de l'obstacle et de l'animal et si pas obstacle alors rien à faire
+		 * renvoie la nouvelle direction sous forme d'angle (0 si rien à faire)
+		 * 
+		 * Si l'obstcale doit etre contouner, changer position animal
+		 * Si l'obstcale peut être franchi pop de l'animal derrière l'obstacle
+		 * Sinon ne rien faire
+		 */
+	}
+	
+	public boolean isEatable(Group o)
 	{
 		return o.isHerbivorous();
 	}

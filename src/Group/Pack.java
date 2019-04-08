@@ -3,6 +3,8 @@ import java.util.ArrayList;
 
 import Animal.Animal;
 import Parameters.Parms;
+import Cell.*;
+import Parameters.*;
 
 public class Pack extends Group
 {
@@ -206,20 +208,7 @@ public class Pack extends Group
 	
 	public double getAgressivity() throws IllegalArgumentException
 	{
-		double res = (chief!=null)?(chief.getAgressivity()):0;
-		
-		for(Group o : others)
-		{
-			if(o.isFamily() || o.isAnimal())
-			{
-				res+=o.getAgressivity();
-			}else
-			{
-				throw new IllegalArgumentException("Le membre de la meute n'est pas reconnu comme type autorisé"); 
-			}
-		}
-		
-		return res/( ((chief!=null)?1:0) + others.size());
+		return chief.getAgressivity();
 	}
 	
 	public double getSociability()
@@ -308,19 +297,45 @@ public class Pack extends Group
 		//if the animal need to eat, then the value of the need will be negative, so we use the absolute value of the sum
 	}
 	
-	public void interact(Group p)
-	{
-		
-	}
-	
 	public boolean isCarnivorous()
 	{
-		return chief.isCarnivorous();
+		return true;
 	}
 	
 	public boolean isHerbivorous()
 	{
-		return chief.isHerbivorous();
+		return false;
+	}
+	
+	public void findFood(Cell[][] map)
+	{
+		double angle = Parms.getDirectionForAnimal(map, chief);
+		
+		for(Group o : others)
+		{
+			if(o.isAnimal())
+			{
+				Animal a = ((Pack)o).getChief();
+				a.move(Math.cos(angle)*Parms.DELTA_MOVE, Math.sin(angle)*Parms.DELTA_MOVE);
+				a.eat(map);	
+			}else if(o.isFamily())
+			{
+				
+			}
+		}
+	}
+	
+	public boolean _fight(Pack o)
+	{
+		
+		
+		return false;
+	}
+	
+	public boolean _fight(Herd o)
+	{
+		
+		return false;
 	}
 	
 }

@@ -3,29 +3,31 @@ import java.util.ArrayList;
 
 import Animal.Animal;
 import Parameters.Parms;
+import Cell.*;
 
 public class Herd extends Group
 {
-	ArrayList<Group> members;
+	ArrayList<Animal> members;
+	
+	/*Une famille d'herbivore est une horde*/
 	
 	public Herd()
 	{
 		super(Parms.TYPE_HERD);
-		members = new ArrayList<Group>();
+		members = new ArrayList<Animal>();
 	}
 	
 	public void addMember(Animal a)
 	{
-		addMember(new Pack(a));
+		addMember(a);
 	}
 	
-	public void addMember(Group o) throws IllegalArgumentException
+	public void merge(Herd herd)
 	{
-		if(!(o.isAnimal() || o.isFamily()))
+		for(Animal a : herd.members)
 		{
-			throw new IllegalArgumentException("Le membre de la meute n'est pas reconnu comme type autorisé");
+			members.add(a);
 		}
-		members.add(o);
 	}
 	
 	public void setDeath(Animal a)
@@ -33,76 +35,46 @@ public class Herd extends Group
 		members.remove(a);
 	}
 	
-	public int getSize() throws IllegalArgumentException
+	public int getSize()
 	{
-		int count = 0;
-		for(Group o : members)
-		{
-			if(o.isFamily() || o.isAnimal())
-			{
-				count+=o.getSize();
-			}else
-			{
-				throw new IllegalArgumentException("Le membre de la meute n'est pas reconnu comme type autorisé"); 
-			}
-		}
-		
-		return count;
+		return members.size();
 	}
 	
 	//implement interface
-	public double getStrength() throws IllegalArgumentException
+	public double getStrength()
 	{
 		double res = 0;
-		for(Group o : members)
+		for(Animal o : members)
 		{
-			if(o.isFamily() || o.isAnimal())
-			{
-				res+=o.getStrength();
-			}else
-			{
-				throw new IllegalArgumentException("Le membre de la meute n'est pas reconnu comme type autorisé"); 
-			}
+			res+=o.getStrength();
 		}
 		
-		return res*Parms.FACTOR_ORGANIZATION_HERD;
+		return res*getSociability();
 	}
 	
-	public double getAgility() throws IllegalArgumentException
+	public double getAgility()
 	{
 		double res = 0;
 		
-		for(Group o : members)
+		for(Animal o : members)
 		{
-			if(o.isFamily() || o.isAnimal())
-			{
-				res+=o.getAgility();
-			}else
-			{
-				throw new IllegalArgumentException("Le membre de la meute n'est pas reconnu comme type autorisé"); 
-			}
+			res+=o.getAgility();
 		}
 		
-		return (res/members.size())*Parms.FACTOR_ORGANIZATION_HERD;
+		return (res/members.size());
 	}
 	
 	
-	public double getAgressivity() throws IllegalArgumentException
+	public double getAgressivity()
 	{
 		double res = 0;
 		
-		for(Group o : members)
+		for(Animal o : members)
 		{
-			if(o.isFamily() || o.isAnimal())
-			{
-				res+=o.getAgressivity();
-			}else
-			{
-				throw new IllegalArgumentException("Le membre de la meute n'est pas reconnu comme type autorisé"); 
-			}
+			res+=o.getAgressivity();
 		}
 		
-		return (res/members.size())*Parms.FACTOR_ORGANIZATION_HERD;
+		return (res/members.size());
 	}
 	
 	public double getSociability()
@@ -111,23 +83,17 @@ public class Herd extends Group
 	}
 	
 	
-	public String getSpecie() throws IllegalArgumentException
+	public String getSpecie()
 	{
 		String specie = null;
 		if(members.size()>0)
 		{
 			specie = members.get(0).getSpecie();
-			for(Group o : members)
+			for(Animal o: members)
 			{
-				if(o.isFamily() || o.isAnimal())
+				if(!specie.equals(o.getSpecie()))
 				{
-					if(!specie.equals(o.getSpecie()))
-					{
-						return null;
-					}
-				}else
-				{
-					throw new IllegalArgumentException("Le membre de la meute n'est pas reconnu comme type autorisé"); 
+					return null;
 				}
 			}
 		}
@@ -138,7 +104,7 @@ public class Herd extends Group
 	
 	public void decreaseEnergy(double ep)
 	{
-		for(Group o : members)
+		for(Animal o : members)
 		{
 			o.decreaseEnergy(ep);
 		}
@@ -146,43 +112,70 @@ public class Herd extends Group
 	
 	public boolean needToEat()
 	{
-		return Parms.AnimalNeedToEat(getNeedsToEat());
+		return getNeedsToEat()!=0;
 	}
 	
-	public double getNeedsToEat() throws IllegalArgumentException
+	public double getNeedsToEat()
 	{
 		double output = 0;
 		
 		//check if each animal need to eat, if so, add the amount of needs to the sum
 		
-		for(Group o : members)
+		for(Animal o : members)
 		{
-			if(o.isFamily() || o.isAnimal())
+			if(o.needToEat())
 			{
 				output+=o.getNeedsToEat();//if the group does not need to eat return 0
-			}else
-			{
-				throw new IllegalArgumentException("Le membre de la meute n'est pas reconnu comme type autorisé"); 
 			}
 		}
 		
-		return Math.abs(output);
+		return (output<0)?Math.abs(output):0;
 		//if the animal need to eat, then the value of the need will be negative, so we use the absolute value of the sum
 	}
 	
 	public boolean isCarnivorous()
 	{
-		return members.get(0).isCarnivorous();
+		return false;
 	}
 	
 	public boolean isHerbivorous()
 	{
-		return members.get(0).isHerbivorous();
+		return true;
 	}
 	
-	public void interact(Group p)
+	
+	public void findFood(Cell[][] map)
 	{
+		double angle = 0;
 		
+		for(Animal o : members)
+		{
+			angle+=Parms.getDirectionForAnimal(map, o);
+		}
+		angle/=getSize();
+		
+		
+		for(Animal o :members)
+		{
+			o.move(Math.cos(angle)*Parms.DELTA_MOVE, Math.sin(angle)*Parms.DELTA_MOVE);
+			o.eat(map);	
+		}
+	}
+	
+	public boolean _fight(Herd o)
+	{
+		//herd-->herd
+		
+		
+		return false;
+	}
+
+	
+	public boolean _fight(Pack o)
+	{
+		//herd-->pack
+		
+		return false;
 	}
 
 }

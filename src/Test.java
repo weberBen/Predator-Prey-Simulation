@@ -35,5 +35,16 @@ public class Test
 		 * 	Si la meute est un animal, alors on fait intéragir l'animal selon le groupe auquel il appartient (ou s'il n'en a pas 
 		 * 	selon les règles normale pour un animal solitaire)
 		 */
+		
+		/*
+		 * Pour un animal à chaque itération :
+		 * 	 veillir()
+		 *   move() 
+		 * 	 
+		 * 
+		 * 
+		 * 
+		 * */
+		 
 	}
 }

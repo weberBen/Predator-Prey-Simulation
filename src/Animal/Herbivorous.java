@@ -1,7 +1,16 @@
 package Animal;
 
+import Cell.Cell;
+
 public class Herbivorous extends Animal
 {
+	public void eat(Cell[][] map)
+	{
+		Cell cell = getCell(map);
+		cell.deviateAnimal(this);
+		energy+=cell.getFood(getNeedsToEat());
+	}
+	
 	public double getStrength()
 	{
 		return 0;
@@ -30,15 +39,5 @@ public class Herbivorous extends Animal
 	public void decreaseEnergy(double ep)
 	{
 		
-	}
-	
-	public double getNeedsToEat()
-	{
-		return 0;
-	}
-	
-	public boolean needToEat()
-	{
-		return false;
 	}
 }

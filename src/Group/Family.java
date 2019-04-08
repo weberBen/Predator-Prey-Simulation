@@ -152,7 +152,7 @@ public class Family extends Group
 			output+=g_mother.getNeedsToEat();
 		}
 		
-		return Math.abs(output);
+		return (output<0)?Math.abs(output):0;
 		//if the animal need to eat, then the value of the need will be negative, so we use the absolute value of the sum
 	}
 	
@@ -238,5 +238,15 @@ public class Family extends Group
 		 * S'il est à proximité de sa famille alors sa force est celle de tous les membres de sa famille
 		 * Sinon sa force est la sienne
 		 */
+	}
+	
+	public void findFood(Cell[][] map)
+	{
+		Animal father = g_father.getChief();
+		if(father==null)
+			return;
+		
+		
+		
 	}
 }

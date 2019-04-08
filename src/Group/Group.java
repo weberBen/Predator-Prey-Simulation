@@ -1,5 +1,7 @@
 package Group;
 import Parameters.Parms;
+import Cell.*;
+
 import Animal.Animal;
 import Interfaces.I_Living;
 
@@ -54,24 +56,52 @@ public abstract class Group implements I_Living
 	public abstract int getSize();
 	public abstract void setDeath(Animal a);
 	
-	public void interact(Group p)
+	public void interact(Group o)
 	{
+		
 		if(this.isFamilyMember())//père ou mère par exemple
 		{
-			if(p.isFamilyMember())
+			if(o.isFamilyMember())
 			{
 				
-			}else if(p.isAnimal())
+			}else if(o.isAnimal())
 			{
 				
-			}else if(p.isPack())
+			}else if(o.isPack())
 			{
 				
-			}else if(p.isHerd())
+			}else if(o.isHerd())
 			{
 				
 			}
-		}else if(p.isAnimal())
+		}else if(o.isAnimal())
+		{
+			
+		}
+	}
+	
+	public boolean fight(Group o)
+	{
+		if(o instanceof Herd)
+			return _fight((Herd)o);
+		else if(o instanceof Pack)
+			return _fight((Pack)o);
+		
+		return false;
+	}
+	
+	protected abstract boolean _fight(Pack o);
+	protected abstract boolean _fight(Herd o);
+	
+	
+	public abstract void findFood(Cell[][] map);
+	
+	public void move(Cell[][] map)
+	{
+		if(needToEat())
+		{
+			findFood(map);
+		}else if (false)
 		{
 			
 		}

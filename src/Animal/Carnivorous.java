@@ -1,7 +1,15 @@
 package Animal;
 
+import Cell.Cell;
+import Parameters.Parms;
+
 public class Carnivorous extends Animal
 {
+	public void eat(Cell[][] map)
+	{
+		
+	}
+	
 	public double getStrength()
 	{
 		return 0;
@@ -32,13 +40,4 @@ public class Carnivorous extends Animal
 		
 	}
 	
-	public double getNeedsToEat()
-	{
-		return 0;
-	}
-	
-	public boolean needToEat()
-	{
-		return false;
-	}
 }
