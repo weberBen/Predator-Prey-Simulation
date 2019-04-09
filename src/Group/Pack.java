@@ -299,12 +299,12 @@ public class Pack extends Group
 	
 	public boolean isCarnivorous()
 	{
-		return true;
+		return chief.isCarnivorous();
 	}
 	
 	public boolean isHerbivorous()
 	{
-		return false;
+		return chief.isHerbivorous();
 	}
 	
 	public void findFood(Cell[][] map)
@@ -327,7 +327,17 @@ public class Pack extends Group
 	
 	public boolean _fight(Pack o)
 	{
-		
+		if(o.isAnimal())
+		{
+			if(o.isFamilyMember())
+			{
+				
+			}else//lonely animal
+			{
+				Animal a = (Animal)o.getChief();
+				a.
+			}
+		}
 		
 		return false;
 	}
@@ -337,5 +347,6 @@ public class Pack extends Group
 		
 		return false;
 	}
+	
 	
 }

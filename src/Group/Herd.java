@@ -101,6 +101,10 @@ public class Herd extends Group
 		return specie;
 	}
 	
+	public void setCanEat(boolean b)
+	{
+		return;
+	}
 	
 	public void decreaseEnergy(double ep)
 	{
@@ -153,13 +157,19 @@ public class Herd extends Group
 			angle+=Parms.getDirectionForAnimal(map, o);
 		}
 		angle/=getSize();
-		
+		setDir(angle);
 		
 		for(Animal o :members)
 		{
-			o.move(Math.cos(angle)*Parms.DELTA_MOVE, Math.sin(angle)*Parms.DELTA_MOVE);
-			o.eat(map);	
+			o.setCanEat(true);
+			o.move(map, angle);
+			o.setCanEat(false);
 		}
+	}
+	
+	public void setDeath()
+	{
+		members.clear();
 	}
 	
 	public boolean _fight(Herd o)

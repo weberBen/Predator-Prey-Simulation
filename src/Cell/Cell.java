@@ -6,7 +6,7 @@ import Group.Group;
 import Group.Pack;
 import Parameters.Parms;
 
-public abstract class Cell extends ObjectMap
+public class Cell extends ObjectMap
 {
 	private double quantity;
 	/*Représente l'énergie disponible sur la case comme nourriture*/
@@ -65,6 +65,11 @@ public abstract class Cell extends ObjectMap
 		{
 			quantity=0;
 		}
+	}
+	
+	public ArrayList<Obstacle> getObstacles()
+	{
+		return new ArrayList<Obstacle>(obstacles);
 	}
 	
 	public double getFood(double needs)

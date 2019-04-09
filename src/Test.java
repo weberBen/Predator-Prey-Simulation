@@ -1,13 +1,56 @@
+
 import java.util.ArrayList;
 
 import Animal.Animal;
+import Cell.*;
+import Animal.*;
+import Group.*;
+import Parameters.*;
 
 public class Test 
 {
 	public static void main(String[] args)
 	{
 		ArrayList<Animal> animals = new ArrayList<Animal>();
+		int DIM = 5;
+		int quantity = 5;
 		
+		
+		Cell[][] map = new Cell[DIM][DIM];
+		for(int i=0; i<map.length; i++)
+    	{
+    		for(int j=0; j<map[i].length; j++)
+    		{
+    			map[i][j] = new Cell(Math.random()*Parms.MAX_QUANTITY_CELL);
+    			
+    			for(int k=0; k<Math.random()*10; k++)
+    			{
+    				if(Math.random()<0.5)
+    				{
+    					map[i][j].addAnimals(new Pack(new Herbivorous()));
+    				}else
+    				{
+    					map[i][j].addAnimals(new Pack(new Carnivorous()));
+    				}
+    			}
+    			
+    			for(int k=0; k<Math.random()*10; k++)
+    			{
+    				double x = Math.random()*Parms.DIM_CELL;
+    				double y = Math.random()*Parms.DIM_CELL;
+    				double rigidity = Math.random();
+    				double height = 10;
+    				double dimx = Math.abs(x-Parms.DIM_CELL)*Math.random();
+    				double dimy = Math.abs(y-Parms.DIM_CELL)*Math.random();
+    				
+    				map[i][j].addObstacle(new Obstacle(x, y, rigidity,  height, dimx, dimy));
+    			}
+    		}
+    	}
+		System.out.println("end");
+		GraphicInterface I = new GraphicInterface(map);
+		I.update();
+		//I.display();
 		/* Création d'une famille
 		 * 
 		 * Family f = new Family();
@@ -41,7 +84,7 @@ public class Test
 		 * 	 veillir()
 		 *   move() 
 		 * 	 
-		 * 
+		 *Percours de la liste de sgroupes, si taille  0 -> supression du groupe de la liste 
 		 * 
 		 * 
 		 * */

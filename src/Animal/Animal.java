@@ -26,6 +26,12 @@ public abstract class Animal extends ObjectMap implements I_Living
 	protected double height;
 	protected double vision;
 	protected Group group;
+	protected boolean isEscaping;
+	protected boolean canEat;
+	protected double direction;
+	protected double effectiveStrength;
+	protected double effectiveAgility;
+	protected double effectiveAgressivity;
 
 	public Animal()
 	{
@@ -47,6 +53,16 @@ public abstract class Animal extends ObjectMap implements I_Living
 		return getNeedsToEat()!=0;
 	}
 	
+	//constructeur par copie
+	public double getDir() {return direction;}
+	public void setDir(double a) {direction = a;}
+	
+	public boolean getIsEscaping() {return isEscaping;}
+	public void setIsEscaping(boolean a)  {isEscaping = a;}
+	
+	public boolean getCanEat() {return canEat;}
+	public void setCanEat(boolean a) {canEat = a;}
+	
 	public Group getGroup() {return group;}
 	public void setGroup(Group group) { this.group = group;}
 	
@@ -56,17 +72,17 @@ public abstract class Animal extends ObjectMap implements I_Living
 	public double getVision() {return vision;}
 	public void setvision(double vision) { this.vision = vision;}
 	
-	public void setStrength(double a) {this.strength = a;}
-	public double getStrength() {return strength;}
+	public void setStrength(double a) {this.effectiveStrength = a;}
+	public double getStrength() {return effectiveStrength;}
 
 	public void setSociability(double a) {this.sociability = a;}
 	public double getSociability() {return sociability;}
 
-	public void setAgility(double a) {this.agility = a;}
-	public double getAgility() {return agility;}
+	public void setAgility(double a) {this.effectiveAgility = a;}
+	public double getAgility() {return effectiveAgility;}
 
-	public void setAggressivity(double a) {this.agressivity = a;}
-	public double getAggressivity() {return agressivity;}
+	public void setAgressivity(double a) {this.effectiveAgressivity = a;}
+	public double getAgressivity() {return effectiveAgressivity;}
 
 	public String getSpecie() {return specie;}
 
@@ -83,14 +99,49 @@ public abstract class Animal extends ObjectMap implements I_Living
 		 * (exemple force au meilleure de la forme et force effective qui est affecté en cas de seuil d'enrgie extreme, pour l'agility pareil
 		 * et pour l'agressivité une fois l'energie remonté au dessa du seuil revient à la normal, en fonction de l'erngie comme x) La valeur
 		 * au meilleur de la forme augmente ou diminue selon l'age
+		 * 
+		 * Lorsque les paramètres redeviennent normaux, escape = false
 		 */
 		age++;
 	}
 
-	public void move(double dx, double dy)
+	public void move(double dir)
 	{
-		x+=dx;
-		y+=dy;
+		x+=Math.cos(direction)*(Parms.DELTA_MOVE+getStrength());
+		y+=Math.sin(direction)*(Parms.DELTA_MOVE+getStrength());
+	}
+	
+	public void move(Cell[][] map)
+	{
+		move(direction);
+		if(isEscaping)
+			return;
+		if(canEat)
+		{
+			eat(map);
+			return;
+		}
+	}
+	
+	public void move(Cell[][] map, double dir)
+	{
+		setDir(dir);
+		move(map);
+	}
+	
+	public void boost(double coeff)
+	{
+		setStrength(strength*coeff);
+		setAgressivity(agressivity*coeff);
+		setAgility(agility*coeff);
+	}
+	
+	public void escape(double dir)
+	{
+		setIsEscaping(true);
+		boost(1.5);
+		setDir(dir);
+		move(dir);
 	}
 	
 	public boolean isCarnivorous()
@@ -108,5 +159,60 @@ public abstract class Animal extends ObjectMap implements I_Living
 	public Cell getCell(Cell[][] map)
 	{ 
 		return map[(int)x][(int)y];
+	}
+	
+	public void setDeath()
+	{
+		Group p = getGroup();
+		p.setDeath(this);
+	}
+	
+	public void fight(Group o)
+	{
+		if(o.getStrength()>getStrength())
+		{
+			if(getAgility()<o.getAgility())//animal loose the fight
+			{
+				setDeath();
+				
+			}else//animal will loose the fight
+			{
+				if(getAgressivity()>Math.random())//animal try to attack
+				{
+					setDeath();
+				}else//animal try to escape
+				{
+					if(Math.random()<0.5)//fail to espace
+					{
+						setDeath();
+					}else
+					{
+						escape(o.getDir());
+					}
+				}
+			}
+		}
+		else
+		{
+			if(getAgility()>o.getAgility())//animal loose the fight
+			{
+				o.setDeath();
+			}else//animal will loose the fight
+			{
+				if(getAgressivity()>Math.random())//animal try to attack
+				{
+					setDeath();
+				}else//animal try to escape
+				{
+					if(Math.random()<0.5)//fail to espace
+					{
+						setDeath();
+					}else
+					{
+						escape(o.getDir());
+					}
+				}
+			}
+		}
 	}
 }

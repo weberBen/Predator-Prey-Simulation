@@ -8,10 +8,21 @@ import Interfaces.I_Living;
 public abstract class Group implements I_Living
 {
 	private final int type;
+	private double dir;
 	
 	public Group(int type)
 	{
 		this.type = type;
+	}
+	
+	public double getDir()
+	{
+		return dir;
+	}
+	
+	public void setDir(double dir)
+	{
+		this.dir = dir;
 	}
 	
 	public int getType()
@@ -95,6 +106,7 @@ public abstract class Group implements I_Living
 	
 	
 	public abstract void findFood(Cell[][] map);
+	public abstract void setCanEat(boolean a);
 	
 	public void move(Cell[][] map)
 	{

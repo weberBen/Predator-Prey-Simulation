@@ -3,14 +3,16 @@ public class Obstacle extends ObjectMap
 {
 	private double rigidity;
 	private double height;
-	private double length;
+	private double dimX;
+	private double dimY;
 	
-	public Obstacle(double x, double y, double rigidity, double height, double length)
+	public Obstacle(double x, double y, double rigidity, double height, double dimX, double dimY)
 	{
 		super(x, y);
 		this.rigidity = rigidity;
 		this.height = height;
-		this.length = length;
+		this.dimX = dimX;
+		this.dimY = dimY;
 	}
 	
 
@@ -34,13 +36,23 @@ public class Obstacle extends ObjectMap
 		height = h;
 	}
 	
-	public double getLength()
+	public double getDimX()
 	{
-		return length;
+		return dimX;
 	}
 	
-	public void setLength(double l)
+	public void setDimX(double dimX)
 	{
-		length = l;
+		this.dimX=dimX;
+	}
+	
+	public double getDimY()
+	{
+		return dimY;
+	}
+	
+	public void setDimY(double dimY)
+	{
+		this.dimY=dimY;
 	}
 }
