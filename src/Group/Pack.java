@@ -169,7 +169,9 @@ public class Pack extends Group
 			{
 				if(father.getChief()==chief)
 				{
-					setDeathForChief();
+					Family temp = chiefFamily;
+					setDeathForChief();//chief's family will be added to the list of members
+					setDeathForMember(temp);//remove the chief's family
 				}else
 				{
 					setDeathForMember(o);
@@ -277,6 +279,9 @@ public class Pack extends Group
 	
 	private void setDeathForMember(Group group)
 	{
+		if(group==null)
+			return;
+		
 		for(Group o : others)
 		{
 			if(o==group)
