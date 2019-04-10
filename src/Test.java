@@ -9,12 +9,39 @@ import Parameters.*;
 
 public class Test 
 {
+	public static void setObstacles(Cell cell, int i, int j)
+	{
+		int maxObstacle = 1;
+		double numObstacles = Math.random()*maxObstacle;
+		double x, y;
+		double rigidity, height, width_ellipse, height_ellipse, rotation;
+		Obstacle ob;
+		
+		for(int k=0; k<numObstacles; k++)
+		{
+			//create a new obstacle for the cell
+			x = i*Parms.DIM_CELL + Math.random()*Parms.DIM_CELL;
+			y = j*Parms.DIM_CELL + Math.random()*Parms.DIM_CELL;
+			
+			height = Math.random()*Parms.MAX_HEIGHT_OBSTACLE;
+			rigidity = Math.random();
+			
+			width_ellipse = Math.random()*Obstacle.MAX_WIDTH_ELLIPSE;
+			height_ellipse = Math.random()*Obstacle.MAX_HEIGHT_ELLIPSE;
+			rotation = Math.random();
+			
+			ob = new Obstacle(x, y,rigidity, height, width_ellipse, height_ellipse, rotation);
+			//check if the new obstacle extend to other cells
+			
+			cell.addObstacle(ob);
+		}
+	}
+	
 	public static void main(String[] args)
 	{
 		ArrayList<Animal> animals = new ArrayList<Animal>();
 		int DIM = 5;
 		int quantity = 5;
-		
 		
 		Cell[][] map = new Cell[DIM][DIM];
 		for(int i=0; i<map.length; i++)
@@ -34,17 +61,7 @@ public class Test
     				}
     			}
     			
-    			for(int k=0; k<Math.random()*10; k++)
-    			{
-    				double x = Math.random()*Parms.DIM_CELL;
-    				double y = Math.random()*Parms.DIM_CELL;
-    				double rigidity = Math.random();
-    				double height = 10;
-    				double dimx = Math.abs(x-Parms.DIM_CELL)*Math.random();
-    				double dimy = Math.abs(y-Parms.DIM_CELL)*Math.random();
-    				
-    				map[i][j].addObstacle(new Obstacle(x, y, rigidity,  height, dimx, dimy));
-    			}
+    			setObstacles(map[i][j], i, j);
     		}
     	}
 		System.out.println("end");

@@ -16,10 +16,11 @@ public final class Parms
 	
 	public static final double DISTANCE_NEIGHBOOR = 1;
 	
-	public static final double DIM_CELL = 2;
+	public static final double DIM_CELL = 10;
 	public static final double DELTA_MOVE = 1.5;
 	
 	public static final double MAX_QUANTITY_CELL = 10;
+	public static final double MAX_HEIGHT_OBSTACLE = 10;
 	
 	private Parms(){}
 	

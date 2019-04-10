@@ -9,6 +9,9 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Line2D;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
 import javax.swing.JFrame;
@@ -18,6 +21,7 @@ import javax.swing.SwingUtilities;
 
 import java.awt.PointerInfo;
 import java.awt.RenderingHints;
+import java.awt.Shape;
 import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.Color;
@@ -27,6 +31,8 @@ import java.awt.BorderLayout;
 
 import Cell.*;
 import Parameters.*;
+import java.util.ArrayList;
+
 
 public class GraphicInterface extends JFrame
 {
@@ -50,7 +56,6 @@ public class GraphicInterface extends JFrame
 	
     public void update()
     {	
-    	windowsMap.cleanArea(Color.WHITE);
     	if(map==null)
     		return;
     	
@@ -58,8 +63,8 @@ public class GraphicInterface extends JFrame
     	int numLign = map.length;
     	int numColumn =  map[0].length;
     	
-    	int dimX =  (int)((windowsMap.getSize().getWidth())/(numColumn));
-    	int dimY =  (int)((windowsMap.getSize().getHeight())/(numLign));
+    	double dimX =  ((windowsMap.getSize().getWidth())/(numColumn));
+    	double dimY =  ((windowsMap.getSize().getHeight())/(numLign));
     
     	
     	for(int i=0; i<numLign; i++)
@@ -73,12 +78,16 @@ public class GraphicInterface extends JFrame
     		}
     	}
     	
+    	drawGrid(numLign, numColumn,dimX, dimY);
     	windowsMap.refresh();
     }
     
     private static Color gradientColor(double p, Color startColor, Color endColor)
     {
     	//p = pourcentage [0,1]
+    	if(p>1)
+    		p=1;
+    	
     	int r = (int)(startColor.getRed()*p + endColor.getRed()*(1-p));
     	int g = (int)(startColor.getGreen()*p + endColor.getGreen()*(1-p));
     	int b = (int)(startColor.getBlue()*p + endColor.getBlue()*(1-p));
@@ -86,20 +95,94 @@ public class GraphicInterface extends JFrame
     	return new Color(r, g, b);
     }
     
-    private void drawCell(Cell cell, int x, int y, int dimX, int dimY)
+    private void drawGrid(int numLign, int numColumn, double dimX, double dimY)
     {
+    	 /* 
+    	  * 				center of the border
+    	  *  ----------------------   |    ----------------------
+    	  * |<-------------------->|  \/  |					    | 
+    	  * |		dimX		   |      |					    |
+    	  * |					   |      |					    |
+    	  * |					   |      |					    |
+    	  * 						<---->
+    	  * 					  border size
+    	  * 
+    	  * We draw a line at each center of the grid border with the size of the gird border
+    	  */
+    	
+     double x1, y1;
+   	 double x2, y2;
+   	 
+   	 //draw all the vertical lines of the grid
+   	 x1 = (dimX + BORDER_SIZE/2);
+   	 y1 = 0;
+   	 
+   	 x2 = x1;
+   	 y2 = windowsMap.getHeight();
+   	 
+	 for(int j=0; j<numColumn-1; j++)
+	 {	 
+		 windowsMap.drawLine(x1, y1, x2, y2, BORDER_C, BORDER_SIZE);
+		 x1 = x1 + (dimX + BORDER_SIZE);
+		 x2 = x1;
+	 }
+	 
+	 
+	 //draw all the horizontal lines of the grid
+	 x1 = 0;
+	 y1 = (dimY + BORDER_SIZE/2);
+   	 
+	 y2 = y1;
+   	 x2 = windowsMap.getWidth();
+   	 
+	 for(int j=0; j<numLign-1; j++)
+	 {	 
+		 windowsMap.drawLine(x1, y1, x2, y2, BORDER_C, BORDER_SIZE);
+		 y1 = y1 + (dimY + BORDER_SIZE);
+		 y2 = y1;
+	 }
+	 
+	 
+
+    }
+    
+    private void drawCell(Cell cell, int x, int y, double dimX, double dimY)
+    {
+    	double px, py;
+    	px = (x*(dimX+BORDER_SIZE));
+    	py = (y*(dimY+BORDER_SIZE));
+    	
     	//get color for the current cell based on the quantity of food in it
     	double p = cell.getQuantity()/Parms.MAX_QUANTITY_CELL;
-    	if(p>1)
-    		p=1;
-    	
-    	Color c = gradientColor(p, new Color(168,145,62), new Color(54,202,68));
+    	Color c = gradientColor(p, new Color(54,202,68), new Color(168,145,62));
     	
     	//draw cell
-    	windowsMap.drawRectangle(x*(dimX+BORDER_SIZE), y*(dimY+BORDER_SIZE), dimX, dimY, c);
+    	windowsMap.drawRectangle(px, py, dimX, dimY, 0, c);
     	
     	//draw obtscales
+    	ArrayList<Obstacle> obstacles =  cell.getObstacles();
+    	double oX, oY;
+    	double oDimX, oDimY;
+    	double factorX, factorY;
     	
+    	factorX =  dimX/Parms.DIM_CELL;
+    	factorY =  dimY/Parms.DIM_CELL;
+    	
+    	System.out.println("factorX="+factorX+"   | factorY="+factorY);
+    	
+    	for(Obstacle o : obstacles)
+    	{
+    		oX = px + o.getX()*factorX;
+    		oY = py + o.getY()*factorY;
+    		
+    		oDimX = o.getWidthEllipse()*factorX;
+    		oDimY = o.getHeightEllipse()*factorY;
+    		
+    		p = o.getHeight()/Parms.MAX_QUANTITY_CELL;
+    		c = gradientColor(p, new Color(0,0,0), new Color(211,211,211));
+    		
+    		windowsMap.drawEclipse(oX, oY, oDimX, oDimY, o.getRotation(), c);
+    	}
     }
 
     private void createAndShowGUI()
@@ -203,18 +286,56 @@ class MouseWheelListenerPanel extends JPanel implements MouseWheelListener
         img.setRGB(x, y, c.getRGB());				
     }
     
-    public int getRGB(int x, int y)
+    public Color getRGB(int x, int y)
     {
-        return img.getRGB(x, y);				
+    	return new Color(img.getRGB(x, y), true);			
     }
     
     
-    public void drawRectangle(int x, int y, int width, int height, Color color)
+    public void drawRectangle(double x, double y, double width, double height, double rotation, Color c)
     {
     	Graphics g = img.getGraphics();
-    	g.drawRect(x,y, width, height);  
-    	g.setColor(color);  
-    	g.fillRect(x, y, width, height);
+    	Graphics2D g2 = (Graphics2D) g;
+        Shape r1 = new Rectangle2D.Double(x, y, width, height);
+        g2.rotate(rotation, x + width / 2, y + height / 2);
+        g2.setPaint(c);
+        g2.fill(r1);
+        //draw border
+        //g2.setStroke(new BasicStroke(sizeBorder));
+        //g2.setPaint(border);
+        
+        g2.draw(r1);
+    }
+    
+    public void drawEclipse(double x, double y, double width, double height, double rotation, Color c)
+    {
+    	//rotation in radian
+    	Graphics g = img.getGraphics();
+    	Graphics2D g2 = (Graphics2D) g;
+        Shape r1 = new Ellipse2D.Double(x, y, width, height);
+        g2.rotate(rotation, x + width / 2, y + height / 2);
+        g2.setPaint(c);
+        g2.fill(r1);
+        //draw border
+        //g2.setStroke(new BasicStroke(sizeBorder));
+        //g2.setPaint(border);
+        
+        g2.draw(r1);
+    }
+    
+    public void drawLine(double x1, double y1, double x2, double y2, Color c, int sizeBorder)
+    {
+    	//rotation in radian
+    	Graphics g = img.getGraphics();
+    	Graphics2D g2 = (Graphics2D) g;
+        Shape r1 = new Line2D.Double(x1, y1, x2, y2);
+        g2.setPaint(c);
+        g2.fill(r1);
+        //draw border
+        g2.setStroke(new BasicStroke(sizeBorder));
+        g2.setPaint(c);
+        
+        g2.draw(r1);
     }
     
     public void paint(Graphics g){			 
