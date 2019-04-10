@@ -20,6 +20,7 @@ public class Herd extends Group
 	public void addMember(Animal a)
 	{
 		addMember(a);
+		a.setGroup(this);
 	}
 	
 	public void merge(Herd herd)
@@ -33,6 +34,23 @@ public class Herd extends Group
 	public void setDeath(Animal a)
 	{
 		members.remove(a);
+		a.setGroup(null);
+	}
+	
+	public void setDeath(int number)
+	{
+		if(number>getSize())
+		{
+			
+		}
+		
+		for(int i=0; i<number; i++)
+		{
+			if(i<getSize())
+			{
+				
+			}
+		}
 	}
 	
 	public int getSize()

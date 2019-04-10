@@ -3,10 +3,13 @@ import Interfaces.I_Living;
 import Cell.*;
 import Group.*;
 import Parameters.*;
-
+import Main.*;
 
 public abstract class Animal extends ObjectMap implements I_Living
 {
+	private static int count = 0;
+	public final int ID;
+	
 	protected final String specie;
 	protected double energy;
 	protected double strength;
@@ -25,7 +28,6 @@ public abstract class Animal extends ObjectMap implements I_Living
 	protected final int tParent;
 	protected double height;
 	protected double vision;
-	protected Group group;
 	protected boolean isEscaping;
 	protected boolean canEat;
 	protected double direction;
@@ -35,6 +37,9 @@ public abstract class Animal extends ObjectMap implements I_Living
 
 	public Animal()
 	{
+		ID = count;
+		count++;
+		
 		tParent = 0;
 		tGestation = 0;
 		nbPossibleKid=0;
@@ -62,9 +67,6 @@ public abstract class Animal extends ObjectMap implements I_Living
 	
 	public boolean getCanEat() {return canEat;}
 	public void setCanEat(boolean a) {canEat = a;}
-	
-	public Group getGroup() {return group;}
-	public void setGroup(Group group) { this.group = group;}
 	
 	public double getHeight() {return height;}
 	public void setHeight(double height) { this.height = height;}
@@ -161,11 +163,6 @@ public abstract class Animal extends ObjectMap implements I_Living
 		return map[(int)x][(int)y];
 	}
 	
-	public void setDeath()
-	{
-		Group p = getGroup();
-		p.setDeath(this);
-	}
 	
 	public void fight(Group o)
 	{
@@ -196,7 +193,7 @@ public abstract class Animal extends ObjectMap implements I_Living
 		{
 			if(getAgility()>o.getAgility())//animal loose the fight
 			{
-				o.setDeath();
+				o.setDeath();//all the members of the group die
 			}else//animal will loose the fight
 			{
 				if(getAgressivity()>Math.random())//animal try to attack

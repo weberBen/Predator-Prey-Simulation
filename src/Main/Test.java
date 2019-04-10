@@ -1,14 +1,21 @@
-
+package Main;
 import java.util.ArrayList;
 
-import Animal.Animal;
 import Cell.*;
 import Animal.*;
 import Group.*;
 import Parameters.*;
+import Main.*;
 
 public class Test 
 {
+	private ArrayList<Animal> list;
+	
+	public Test()
+	{
+		list = new ArrayList<Animal>();
+	}
+	
 	public static void setObstacles(Cell cell, int i, int j)
 	{
 		int maxObstacle = 1;
@@ -37,11 +44,28 @@ public class Test
 		}
 	}
 	
-	public static void main(String[] args)
+	public void test1()
+	{
+		list.add(new Carnivorous());
+		list.add(new Carnivorous());
+		list.add(new Carnivorous());
+		
+		Run.addGroup(list.get(0));
+		Run.addGroup(list.get(1));
+		Run.addGroup(list.get(2));
+	}
+	
+	public void test2()
+	{
+		Run.removeGroup(list.get(1));
+	}
+	
+	private static void main(String[] args)
 	{
 		ArrayList<Animal> animals = new ArrayList<Animal>();
 		int DIM = 5;
 		int quantity = 5;
+		
 		
 		Cell[][] map = new Cell[DIM][DIM];
 		for(int i=0; i<map.length; i++)

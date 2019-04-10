@@ -9,10 +9,22 @@ public abstract class Group implements I_Living
 {
 	private final int type;
 	private double dir;
+	private Group group;
+	
+	public void setGroup(Group g)
+	{
+		group = g;
+	}
+	
+	public Group getGroup()
+	{
+		return group;
+	}
 	
 	public Group(int type)
 	{
 		this.type = type;
+		this.group =  null;
 	}
 	
 	public double getDir()
@@ -57,15 +69,18 @@ public abstract class Group implements I_Living
 			return false;
 		
 		Pack p = (Pack)this;
-		if(p.getChief()==null)
+		if(p.getSize()!=1)
 			return false;
 		
-		return p.getChief().getGroup()!=null;
+		Group o = p.getGroup();
+		return (o instanceof Family);
 	}
 	
 	public abstract double getNeedsToEat();	
 	public abstract int getSize();
+	public abstract void setDeath();
 	public abstract void setDeath(Animal a);
+	public abstract void setDeath(int number);
 	
 	public void interact(Group o)
 	{

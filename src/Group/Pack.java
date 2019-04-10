@@ -9,12 +9,14 @@ import Parameters.*;
 public class Pack extends Group
 {
 	private Animal chief;
+	private Family chiefFamily;
 	private ArrayList<Group> others;
 	
 	public Pack()
 	{
 		super(Parms.TYPE_PACK);
 		chief = null;
+		chiefFamily = null;
 		others = new ArrayList<Group>();
 	}
 	
@@ -22,6 +24,13 @@ public class Pack extends Group
 	{
 		this();
 		chief = a;
+		chiefFamily = null;
+	}
+	
+	public Pack(Pack p)//a single animal is consider as a pack of one animal
+	{
+		this();
+		setChief(p);
 	}
 	
 	public int getSize() throws IllegalArgumentException
@@ -44,9 +53,11 @@ public class Pack extends Group
 	
 	
 	//chief
-	public void setChief(Animal a)
+	public void setChief(Pack o)
 	{
-		chief = a;
+		chief = o.getChief();
+		if(o.isFamilyMember())
+			chiefFamily = (Family)o.getGroup();
 	}
 	
 	public Animal getChief()
@@ -54,12 +65,25 @@ public class Pack extends Group
 		return chief;
 	}
 	
+	public Family getChiefFamily()
+	{
+		return chiefFamily;
+	}
+	
+	
 	//the others
 	public void addMember(Animal a)
 	{
-		addMember(new Pack(a));
+		Pack p = new Pack(a);
+		addMember(p);
+		p.setGroup(this);
 	}
 	
+	public void addFamily(Family f)
+	{
+		addMember(f);
+		f.setGroup(this);
+	}
 	
 	public void addMember(Group o) throws IllegalArgumentException
 	{
@@ -89,18 +113,32 @@ public class Pack extends Group
 		
 		if(replaceChief)
 		{
-			Animal temp = chief;
+			Animal temp_a = chief;
+			Family temp_f = chiefFamily;
+			
+			//set new chief
 			if(o.isFamily())
 			{
 				Family f = (Family)o;
 				Animal a = f.getFather().getChief();
+				
 				chief = a;
+				chiefFamily = f;
 			}else if(o.isAnimal())
 			{
 				Pack p = (Pack)o;
 				chief = p.getChief();
 			}
-			others.add(new Pack(temp));
+			
+			//remove old chief
+			if(temp_f==null)
+			{
+				others.add(new Pack(temp_a));
+			}else
+			{
+				others.add(chiefFamily);
+			}
+			
 		}else
 		{
 			others.add(o);
@@ -108,18 +146,74 @@ public class Pack extends Group
 	}
 	
 	
-	public void setDeath(Animal a)
+	public void setDeath(Group o)
 	{
-		if(a.equals(chief))
+		if(o==null)
+			return;
+		
+		if(o.isAnimal())
 		{
-			setDeathForChief();
-		}else
+			Pack p = (Pack)o;
+			if(p.getChief()==chief)
+			{
+				setDeathForChief();
+			}else
+			{
+				setDeathForMember(o);
+			}
+		}else if(o.isFamily())
 		{
-			setDeathForMember(a);
+			Family f = (Family)o;
+			Pack father = f.getFather();
+			if(father!=null)
+			{
+				if(father.getChief()==chief)
+				{
+					setDeathForChief();
+				}else
+				{
+					setDeathForMember(o);
+				}
+			}
 		}
 	}
 	
-	public void setDeathForChief() throws IllegalArgumentException
+	
+	public void setDeath()
+	{
+		int size = others.size();
+		for(int i=size-1; i>=0; i++)
+		{
+			setDeath(others.get(i));
+		}
+		
+		
+		
+	}
+	
+	public void setDeath(int number)
+	{
+		if(number>getSize())
+		{
+			int size = others.size();
+			Group o;
+			for(int i=size-1; i>=0; i--)
+			{
+				o = others.get(i);
+				if(o.isAnimal())
+				{
+					others.remove(i);
+				}else if(o.isFamily())
+				{
+					
+				}
+			}
+			
+			setDeathForChief();//need to be after the loop of the group (to set the new chief)
+		}
+	}
+	
+	private void setDeathForChief() throws IllegalArgumentException
 	{
 		chief = null;
 		if(others.size()>0)//set the new chief as the animal with the highest strength
@@ -148,12 +242,18 @@ public class Pack extends Group
 			
 			
 			//set the new chief
+			chief=null;
+			others.add(chiefFamily);
+			chiefFamily=null;
+			
 			o = others.get(index);
 			if(o.isFamily())
 			{
 				Family f = (Family)o;
 				Animal a = f.getFather().getChief();
+				
 				chief = a;
+				chiefFamily = f;
 			}else if(o.isAnimal())
 			{
 				Pack p = (Pack)o;
@@ -163,11 +263,55 @@ public class Pack extends Group
 		}
 	}
 	
-	public void setDeathForMember(Animal a)
+	public void clear()
 	{
-		others.remove(a);
+		chief = null;
+		if(chiefFamily!=null)
+		{
+			chiefFamily.setGroup(null);
+			chiefFamily=null;
+		}
+		
+		others.clear();
 	}
-
+	
+	private void setDeathForMember(Group group)
+	{
+		for(Group o : others)
+		{
+			if(o==group)
+			{
+				if(o.isFamily())
+				{
+					o.setDeath();
+				}else if(o.isAnimal())
+				{
+					others.remove(o);
+				}
+			}
+		}
+	}
+	
+	
+	public void splitFamily(Family f)
+	{
+		//remove family without killing animals in it
+		Pack g = f.getFather();
+		if(g!=null)
+		{
+			Animal father = f.getFather().getChief();
+			if(father!=chief)
+			{
+					others.add(g);
+			}
+		}
+		
+		g = f.getMother();
+		if(g!=null)
+			others.add(g);
+		
+		others.remove(f);
+	}
 	
 	//implement
 	public double getStrength() throws IllegalArgumentException
