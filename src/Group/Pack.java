@@ -5,12 +5,13 @@ import Animal.Animal;
 import Parameters.Parms;
 import Cell.*;
 import Parameters.*;
+import Main.*;
 
 public class Pack extends Group
 {
 	private Animal chief;
 	private Family chiefFamily;
-	private ArrayList<Group> others;
+	public ArrayList<Group> others;
 	
 	public Pack()
 	{
@@ -48,7 +49,15 @@ public class Pack extends Group
 			}
 		}
 		
-		return (chief!=null)?1:0 +count;
+		if(chiefFamily!=null)
+		{
+			count+=chiefFamily.getSize();
+		}else if(chief!=null)
+		{
+			count++;
+		}
+		
+		return count;
 	}
 	
 	
@@ -75,25 +84,26 @@ public class Pack extends Group
 	public void addMember(Animal a)
 	{
 		Pack p = new Pack(a);
-		addMember(p);
 		p.setGroup(this);
+		addGroup(p);
 	}
 	
 	public void addFamily(Family f)
 	{
-		addMember(f);
 		f.setGroup(this);
+		addGroup(f);
 	}
 	
-	public void addMember(Group o) throws IllegalArgumentException
+	public void addGroup(Group o) throws IllegalArgumentException
 	{
+		Run.removeGroup(o);
 		if(!(o.isAnimal() || o.isFamily()))
 		{
 			throw new IllegalArgumentException("Le membre de la meute n'est pas reconnu comme type autorisé");
 		}
 		
 		double s1 = o.getStrength();
-		double s2 = (chief==null)?0:chief.getStrength();
+		double s2 = (chief==null)?-1:chief.getStrength();
 		boolean replaceChief = false;
 		
 		//if the new animal is stronger than the chief, then the old chief is replace
@@ -133,10 +143,11 @@ public class Pack extends Group
 			//remove old chief
 			if(temp_f==null)
 			{
-				others.add(new Pack(temp_a));
+				if(temp_a!=null)
+					others.add(new Pack(temp_a));
 			}else
 			{
-				others.add(chiefFamily);
+				others.add(temp_f);
 			}
 			
 		}else
@@ -183,14 +194,13 @@ public class Pack extends Group
 	
 	public void setDeath()
 	{
-		int size = others.size();
+		ArrayList<Group> temp = new ArrayList<Group>(others);
+		int size = temp.size();
+		
 		for(int i=size-1; i>=0; i++)
 		{
-			setDeath(others.get(i));
+			setDeath(temp.get(i));
 		}
-		
-		
-		
 	}
 	
 	public void setDeath(int number)
@@ -281,17 +291,19 @@ public class Pack extends Group
 	{
 		if(group==null)
 			return;
-		
+		System.out.println("endter");
 		for(Group o : others)
 		{
 			if(o==group)
-			{
+			{System.out.println("equal");
 				if(o.isFamily())
 				{
 					o.setDeath();
 				}else if(o.isAnimal())
 				{
+					System.out.println("remove");
 					others.remove(o);
+					return;
 				}
 			}
 		}
@@ -402,16 +414,16 @@ public class Pack extends Group
 	}
 	
 	
-	public void decreaseEnergy(double ep)
+	public void age()
 	{
 		if(chief!=null)
 		{
-			chief.decreaseEnergy(ep);
+			chief.age();
 		}
 		
 		for(Group o : others)
 		{
-			o.decreaseEnergy(ep);
+			o.age();
 		}
 	}
 	
@@ -465,8 +477,9 @@ public class Pack extends Group
 			if(o.isAnimal())
 			{
 				Animal a = ((Pack)o).getChief();
-				a.move(Math.cos(angle)*Parms.DELTA_MOVE, Math.sin(angle)*Parms.DELTA_MOVE);
-				a.eat(map);	
+				a.setCanEat(true);
+				a.move(map, angle);
+				a.setCanEat(false);
 			}else if(o.isFamily())
 			{
 				
@@ -484,7 +497,7 @@ public class Pack extends Group
 			}else//lonely animal
 			{
 				Animal a = (Animal)o.getChief();
-				a.
+				
 			}
 		}
 		
@@ -495,6 +508,29 @@ public class Pack extends Group
 	{
 		
 		return false;
+	}
+	
+	public String toString()
+	{
+		if(isAnimal())
+			return chief.toString();
+		
+		String res="Meute : \n";
+		res+="\tChef : " + ((chief!=null)?chief.toString():"");
+		res+="\n\tMembres : ";
+		for(Group o : others)
+		{
+			res+="\n\t\t";
+			if(o.isAnimal())
+			{
+				Pack p = (Pack)o;
+				res+= p.getChief().toString();
+			}else
+			{
+				res+= o.toString()+ "   | Size = "+o.getSize();
+			}
+		}
+		return res;
 	}
 	
 	

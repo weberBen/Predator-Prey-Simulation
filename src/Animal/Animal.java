@@ -170,18 +170,18 @@ public abstract class Animal extends ObjectMap implements I_Living
 		{
 			if(getAgility()<o.getAgility())//animal loose the fight
 			{
-				setDeath();
+				//setDeath();
 				
 			}else//animal will loose the fight
 			{
 				if(getAgressivity()>Math.random())//animal try to attack
 				{
-					setDeath();
+					//setDeath();
 				}else//animal try to escape
 				{
 					if(Math.random()<0.5)//fail to espace
 					{
-						setDeath();
+						//setDeath();
 					}else
 					{
 						escape(o.getDir());
@@ -198,12 +198,12 @@ public abstract class Animal extends ObjectMap implements I_Living
 			{
 				if(getAgressivity()>Math.random())//animal try to attack
 				{
-					setDeath();
+					//setDeath();
 				}else//animal try to escape
 				{
 					if(Math.random()<0.5)//fail to espace
 					{
-						setDeath();
+						//setDeath();
 					}else
 					{
 						escape(o.getDir());
@@ -211,5 +211,11 @@ public abstract class Animal extends ObjectMap implements I_Living
 				}
 			}
 		}
+	}
+	
+	public String toString()
+	{
+		String type = isHerbivorous()?"Herbivore": "Carnivore";
+		return "Animal(id="+ID+", type="+type+")";
 	}
 }

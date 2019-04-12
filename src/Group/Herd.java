@@ -8,7 +8,7 @@ import Cell.*;
 public class Herd extends Group
 {
 	ArrayList<Animal> members;
-	
+	//all the animal will move together (no need to know with which group the animal is linked with)
 	/*Une famille d'herbivore est une horde*/
 	
 	public Herd()
@@ -19,8 +19,7 @@ public class Herd extends Group
 	
 	public void addMember(Animal a)
 	{
-		addMember(a);
-		a.setGroup(this);
+		members.add(a);
 	}
 	
 	public void merge(Herd herd)
@@ -31,10 +30,19 @@ public class Herd extends Group
 		}
 	}
 	
+	public void setDeath(Group o)
+	{
+		if(o!=null && o.isAnimal())
+		{
+			Pack p = (Pack)o;
+			Animal a = p.getChief();
+			setDeath(a);
+		}
+	}
+	
 	public void setDeath(Animal a)
 	{
 		members.remove(a);
-		a.setGroup(null);
 	}
 	
 	public void setDeath(int number)
@@ -119,16 +127,11 @@ public class Herd extends Group
 		return specie;
 	}
 	
-	public void setCanEat(boolean b)
-	{
-		return;
-	}
-	
-	public void decreaseEnergy(double ep)
+	public void age()
 	{
 		for(Animal o : members)
 		{
-			o.decreaseEnergy(ep);
+			o.age();
 		}
 	}
 	
@@ -204,6 +207,15 @@ public class Herd extends Group
 		//herd-->pack
 		
 		return false;
+	}
+	
+	public String toString()
+	{
+		String res = "Troupeau :\n";
+		for(Animal a : members)
+			res+="\t"+a.toString()+"\n";
+		
+		return res;
 	}
 
 }

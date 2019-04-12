@@ -44,17 +44,17 @@ public abstract class Group implements I_Living
 	
 	public boolean isFamily()
 	{
-		return (type==Parms.TYPE_FAMILY);
+		return this instanceof Family;
 	}
 	
 	public boolean isHerd()
 	{
-		return (type==Parms.TYPE_HERD);
+		return this instanceof Herd;
 	}
 	
 	public boolean isPack()
 	{
-		return (type==Parms.TYPE_PACK);
+		return this instanceof Pack;
 	}
 	
 	public boolean isAnimal()
@@ -79,7 +79,7 @@ public abstract class Group implements I_Living
 	public abstract double getNeedsToEat();	
 	public abstract int getSize();
 	public abstract void setDeath();
-	public abstract void setDeath(Animal a);
+	public abstract void setDeath(Group o);
 	public abstract void setDeath(int number);
 	
 	public void interact(Group o)
@@ -119,9 +119,7 @@ public abstract class Group implements I_Living
 	protected abstract boolean _fight(Pack o);
 	protected abstract boolean _fight(Herd o);
 	
-	
 	public abstract void findFood(Cell[][] map);
-	public abstract void setCanEat(boolean a);
 	
 	public void move(Cell[][] map)
 	{

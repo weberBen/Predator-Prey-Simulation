@@ -123,16 +123,16 @@ public class Family extends Group
 		return g_father.getSpecie();
 	}
 	
-	public void decreaseEnergy(double ep)
+	public void age()
 	{
 		if(g_father!=null)
 		{
-			g_father.decreaseEnergy(ep);
+			g_father.age();
 		}
 		
 		if(g_mother!=null)
 		{
-			g_mother.decreaseEnergy(ep);
+			g_mother.age();
 		}
 	}
 	
@@ -201,17 +201,17 @@ public class Family extends Group
 	}
 	
 	
-	public void setDeath(Animal a)
+	public void setDeath(Group o)
 	{
-		if(g_father!=null && a==g_father.getChief())
+		if(g_father!=null && o==g_father)
 		{
 			setDeathForFather();
-		}else if(g_mother!=null && a==g_mother.getChief())
+		}else if(g_mother!=null && o==g_mother)
 		{
 			setDeathForMother();
 		}else 
 		{
-			setDeathForChild(a);
+			setDeathForChild(o);
 		}
 		
 		if(g_father!=null && g_father.getSize()==0)
@@ -272,17 +272,17 @@ public class Family extends Group
 		{
 			g_father = new Pack(g_mother);
 		}
-		g_mother.setDeath(g_mother.getChief());
+		g_mother.setDeath(g_mother);
 	}
 	
 	private void setDeathForMother()
 	{
-		g_mother.setDeath(g_mother.getChief());
+		g_mother.setDeath(new Pack(g_mother.getChief()));
 	}
 	
-	private void setDeathForChild(Animal a)
+	private void setDeathForChild(Group o)
 	{
-		g_mother.setDeath(a);
+		g_mother.setDeath(o);
 	}
 	
 	public int getSize()
@@ -337,5 +337,26 @@ public class Family extends Group
 		Animal father = g_father.getChief();
 		if(father==null)
 			return;
+	}
+	
+	
+	public boolean _fight(Pack o)
+	{
+		return false;
+	}
+	
+	public boolean _fight(Herd o)
+	{
+		return false;
+	}
+	
+	public String toString()
+	{
+		String res ="";
+		res+="Famille : \n";
+		res+="\tPère : " + g_father.getChief().toString();
+		res+="\n\tMère : " + g_mother.toString();
+		
+		return res;
 	}
 }
