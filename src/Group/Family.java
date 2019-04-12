@@ -11,11 +11,34 @@ public class Family extends Group
 	private Pack g_mother;
 	private Animal caller;
 	
-	public Family()
+	private Family(){};
+	
+	public Family(Pack g_father, Pack g_mother) throws IllegalArgumentException
 	{
-		super(Parms.TYPE_FAMILY);
-		this.g_father = null;
-		this.g_mother = null;
+		super();
+		
+		if(g_father==null || g_mother==null)
+			throw new IllegalArgumentException("Un des parents de la famille est nul");
+		
+		setFather(g_father);
+		setMother(g_mother);
+		addChildren();
+	}
+	
+	private void addChildren()//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	{
+		Animal mother = g_mother.getChief();
+		int numChildren = 1+ (int)(1 + Math.random()*(mother.NB_POSSIBLE_KID));
+		
+		Animal a;
+		Pack p;
+		
+		for(int i=0; i<numChildren; i++)
+		{
+			a = mother.createChild();
+			p = new Pack(a);
+			addChild(p);
+		}
 	}
 	
 	public void setCaller(Animal caller)
@@ -24,9 +47,9 @@ public class Family extends Group
 	}
 	
 	//animal in charge of food
-	public void setFather(Animal a)
+	private void setFather(Pack o)//remove later
 	{
-		g_father = new Pack(a);
+		g_father = o;
 		g_father.setGroup(this);
 	}
 	
@@ -36,9 +59,9 @@ public class Family extends Group
 	}
 	
 	//animal in charge of children
-	public void setMother(Animal a)
+	private void setMother(Pack o)
 	{
-		g_mother = new Pack(a);
+		g_mother = o;
 		g_mother.setGroup(this);
 	}
 	
@@ -48,9 +71,9 @@ public class Family extends Group
 	}
 	
 	//children
-	public void addChild(Animal a)
+	private void addChild(Group o)
 	{
-		g_mother.addMember(a);
+		g_mother.add(o);
 	}
 	
 	//implement interface
@@ -124,7 +147,8 @@ public class Family extends Group
 	}
 	
 	public void age()
-	{
+	{//verifier si enfant trop grand (comme pere mere ou "enfant" =>plus de mineur dans la famille) on la split
+		//si enfant trop grand on le sort de la famille
 		if(g_father!=null)
 		{
 			g_father.age();
@@ -214,6 +238,7 @@ public class Family extends Group
 			setDeathForChild(o);
 		}
 		
+		
 		if(g_father!=null && g_father.getSize()==0)
 		{
 			Pack temp1 = g_father;
@@ -238,7 +263,9 @@ public class Family extends Group
 			
 			Pack temp = g_mother;
 			if(temp.getSize()==0)
+			{
 				g_mother = null;
+			}
 			
 			if(getGroup()!=null)//family is part of an other group
 			{
@@ -248,6 +275,10 @@ public class Family extends Group
 			{
 				if(temp.getSize()==0)
 				{
+					/* If the children of the family is not old enough, then we don't split
+					 * the family because the children need to be protected
+					 * (otherwise, if there is no more children in the family we split it)
+					 */
 					Run.removeGroup(temp);
 				}
 			}
@@ -272,7 +303,8 @@ public class Family extends Group
 		{
 			g_father = new Pack(g_mother);
 		}
-		g_mother.setDeath(g_mother);
+		Animal mother = g_mother.getChief();
+		g_mother.setDeath(new Pack(mother));
 	}
 	
 	private void setDeathForMother()

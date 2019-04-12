@@ -12,6 +12,7 @@ public class Run
 	
 	public static void main(String[] args)
 	{
+		//pack
 		ArrayList<Animal> temp_l = new ArrayList<Animal>();
 		
 		for(int i=0; i<5; i++)
@@ -27,32 +28,41 @@ public class Run
 		ArrayList<Group> temp = new ArrayList<Group>(list);
 		for(Group o : temp)
 		{
-			h.addGroup(o);
+			h.add(o);
 		}
 		list.add(h);
 		
-		System.out.println("-------------------------\nliste=\n"+Run._toString());
+		//family
+		Animal father = new Carnivorous();
+		//father.setStrength(10);//!!!!!!!!!!!!!!!!!!!!!!!! problème
+		Animal mother = new Carnivorous();
+		Pack g_father = new Pack(father);
+		Pack g_mother = new Pack(mother);
 		
-		System.out.println("anuimal="+temp.get(0));
-		h.setDeath(temp.get(0));
-		
-		System.out.println("-------------------------\nliste=\n"+Run._toString());
-		
+		Family f = new Family(g_father, g_mother);
+		list.add(g_father);
+		list.add(g_mother);
 		
 		
+		System.out.println(Run._toString());
+		
+		h.add(f);
+		
+		System.out.println(Run._toString());
+		
+		h.setDeath();
 		
 		
-		/*
-		for (Group p : h.others)
-			System.out.println(p);*/
+		System.out.println(Run._toString());
 		
 	}
 	
 	public static String _toString()
 	{
-		String res ="";
+		String res ="---------------LISTE GROUPES-------------------\n";
 		for(Group o : list)
-			res+=o.toString()+"\n";
+			res+="*** "+o.toString()+"\n";
+		res+="\n--------------FIN LISTE GROUPES--------------------";
 		return res;
 	}
 	

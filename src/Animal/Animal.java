@@ -22,7 +22,7 @@ public abstract class Animal extends ObjectMap implements I_Living
 	protected Cell zoneLive;
 	protected int liveRadius;
 	protected final boolean isMale;
-	protected final int nbPossibleKid;
+	public final int NB_POSSIBLE_KID;
 	protected int age;
 	protected final int tGestation;
 	protected final int tParent;
@@ -42,10 +42,12 @@ public abstract class Animal extends ObjectMap implements I_Living
 		
 		tParent = 0;
 		tGestation = 0;
-		nbPossibleKid=0;
+		NB_POSSIBLE_KID=3;
 		specie = "";
 		isMale = false;
 	}
+	
+	public abstract Animal createChild();
 	
 	public double getNeedsToEat()
 	{

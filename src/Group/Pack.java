@@ -9,13 +9,13 @@ import Main.*;
 
 public class Pack extends Group
 {
-	private Animal chief;
-	private Family chiefFamily;
+	public Animal chief;
+	public Family chiefFamily;
 	public ArrayList<Group> others;
 	
 	public Pack()
 	{
-		super(Parms.TYPE_PACK);
+		super();
 		chief = null;
 		chiefFamily = null;
 		others = new ArrayList<Group>();
@@ -81,25 +81,26 @@ public class Pack extends Group
 	
 	
 	//the others
-	public void addMember(Animal a)
+	public void add(Group o) throws IllegalArgumentException
 	{
-		Pack p = new Pack(a);
-		p.setGroup(this);
-		addGroup(p);
-	}
-	
-	public void addFamily(Family f)
-	{
-		f.setGroup(this);
-		addGroup(f);
-	}
-	
-	public void addGroup(Group o) throws IllegalArgumentException
-	{
-		Run.removeGroup(o);
 		if(!(o.isAnimal() || o.isFamily()))
 		{
 			throw new IllegalArgumentException("Le membre de la meute n'est pas reconnu comme type autorisé");
+		}
+		o.setGroup(this);
+		addGroup(o);
+	}
+	
+	private void addGroup(Group o)
+	{
+		if(o.isFamily())
+		{
+			Family f = (Family)o;
+			Run.removeGroup(f.getFather());
+			Run.removeGroup(f.getMother());
+		}else
+		{
+			Run.removeGroup(o);
 		}
 		
 		double s1 = o.getStrength();
@@ -172,6 +173,9 @@ public class Pack extends Group
 			{
 				setDeathForMember(o);
 			}
+		}else if(isInFamily(chiefFamily, o))
+		{
+			chiefFamily.setDeath(o);
 		}else if(o.isFamily())
 		{
 			Family f = (Family)o;
@@ -197,10 +201,20 @@ public class Pack extends Group
 		ArrayList<Group> temp = new ArrayList<Group>(others);
 		int size = temp.size();
 		
-		for(int i=size-1; i>=0; i++)
+		for(int i=size-1; i>=0; i--)
 		{
 			setDeath(temp.get(i));
 		}
+		
+		if(chiefFamily!=null)
+		{
+			chiefFamily.setDeath();
+		}else if(chief!=null)
+		{
+			chief = null;
+		}
+		
+		Run.removeGroup(this);
 	}
 	
 	public void setDeath(int number)
@@ -227,7 +241,22 @@ public class Pack extends Group
 	
 	private void setDeathForChief() throws IllegalArgumentException
 	{
+		if(chiefFamily!=null)
+		{
+			chiefFamily.setDeath(chiefFamily.getFather());
+			if(chiefFamily.getSize()>2)
+			{
+				/*If the family is composed by two members only, then we split the family 
+				 * and add each parent into the list of animal of the pack
+				 * Else, the family remain alive and we have to add the whole family as a member of 
+				 * the pack
+				 */
+				others.add(chiefFamily);
+			}
+		}
 		chief = null;
+		chiefFamily=null;
+		
 		if(others.size()>0)//set the new chief as the animal with the highest strength
 		{
 			//fin the animal with the highest strength
@@ -254,10 +283,6 @@ public class Pack extends Group
 			
 			
 			//set the new chief
-			chief=null;
-			others.add(chiefFamily);
-			chiefFamily=null;
-			
 			o = others.get(index);
 			if(o.isFamily())
 			{
@@ -291,20 +316,23 @@ public class Pack extends Group
 	{
 		if(group==null)
 			return;
-		System.out.println("endter");
+		
 		for(Group o : others)
 		{
 			if(o==group)
-			{System.out.println("equal");
+			{
 				if(o.isFamily())
 				{
 					o.setDeath();
 				}else if(o.isAnimal())
 				{
-					System.out.println("remove");
 					others.remove(o);
 					return;
 				}
+			}else if(o.isFamily() && isInFamily((Family)o, group))//only kill a member of the family
+			{	
+				o.setDeath(group);
+				return;
 			}
 		}
 	}
@@ -527,7 +555,7 @@ public class Pack extends Group
 				res+= p.getChief().toString();
 			}else
 			{
-				res+= o.toString()+ "   | Size = "+o.getSize();
+				res+= o.toString();
 			}
 		}
 		return res;

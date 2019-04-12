@@ -7,7 +7,6 @@ import Interfaces.I_Living;
 
 public abstract class Group implements I_Living
 {
-	private final int type;
 	private double dir;
 	private Group group;
 	
@@ -21,10 +20,9 @@ public abstract class Group implements I_Living
 		return group;
 	}
 	
-	public Group(int type)
+	public Group()
 	{
-		this.type = type;
-		this.group =  null;
+		group =  null;
 	}
 	
 	public double getDir()
@@ -37,14 +35,19 @@ public abstract class Group implements I_Living
 		this.dir = dir;
 	}
 	
-	public int getType()
-	{
-		return type;
-	}
-	
 	public boolean isFamily()
 	{
 		return this instanceof Family;
+	}
+	
+	public boolean isInFamily(Family f, Group p)
+	{
+		if(f==null || p==null)
+			return false;
+		if(!p.isFamilyMember())
+			return false;
+		
+		return p.getGroup()==f;
 	}
 	
 	public boolean isHerd()

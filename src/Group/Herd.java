@@ -13,11 +13,22 @@ public class Herd extends Group
 	
 	public Herd()
 	{
-		super(Parms.TYPE_HERD);
+		super();
 		members = new ArrayList<Animal>();
 	}
 	
-	public void addMember(Animal a)
+	public void add(Group o) throws IllegalArgumentException 
+	{
+		if(!o.isAnimal())
+		{
+			throw new IllegalArgumentException("Le membre de la meute n'est pas reconnu comme type autorisé");
+		}
+		
+		Pack p = (Pack)o;
+		addAnimal(p.getChief());
+	}
+	
+	private void addAnimal(Animal a)
 	{
 		members.add(a);
 	}

@@ -4,11 +4,7 @@ import Cell.*;
 import Animal.*;
 
 public final class Parms 
-{
-	public static final int TYPE_FAMILY = 0;
-	public static final int TYPE_PACK = 1;
-	public static final int TYPE_HERD = 2;
-	
+{	
 	public static final double FACTOR_ORGANIZATION_HERD = 0.5;
 	
 	public static final double hungerThreshold = 0.7;

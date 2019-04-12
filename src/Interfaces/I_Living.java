@@ -8,7 +8,6 @@ public interface I_Living
 	public double getAgressivity();
 	public String getSpecie();
 	
-	//public void decreaseEnergy(int number,double ep);
 	public void age();
 	
 	public double getNeedsToEat();
