@@ -13,6 +13,8 @@ public class Run
 	public static void main(String[] args)
 	{
 		//pack
+		
+		/*
 		ArrayList<Animal> temp_l = new ArrayList<Animal>();
 		
 		for(int i=0; i<5; i++)
@@ -43,18 +45,61 @@ public class Run
 		list.add(g_father);
 		list.add(g_mother);
 		
-		
-		System.out.println(Run._toString());
-		
 		h.add(f);
+		*/
 		
+		//------------------------------------------------------------------------
+		
+		 Herd h1 = createHerbivorous();
+		 Herd h2 =  createHerbivorous();
+		 Herd h3 = createHerbivorous();
+		 Herd h4 = createHerbivorous();
+		 
+		 h1.add(h2);
+		 h1.add(h3);
+		 h1.add(h4);
+		 
+		 h1.setDeath(10);
+		 
+		 display();
+		 
+		 
+		//Herd  h = createHerd(3);
+	}
+	
+	public static void display()
+	{
 		System.out.println(Run._toString());
+	}
+	
+	public static Herd createHerbivorous()
+	{
+		Herbivorous a = new Herbivorous();
+		Herd h = new Herd(a);
+		Run.addGroup(h);
 		
-		h.setDeath();
+		return h;
+	}
+	
+	public static Pack createCarnivorous()
+	{
+		Carnivorous a = new Carnivorous();
+		Pack h = new Pack(a);
+		Run.addGroup(h);
 		
+		return h;
+	}
+	
+	public static Herd createHerd(int numMember)
+	{
+		Herd h = new Herd();
+		for(int i=0; i<numMember; i++)
+		{
+			h.add(createHerbivorous());
+		}
+		Run.addGroup(h);
 		
-		System.out.println(Run._toString());
-		
+		return h;
 	}
 	
 	public static String _toString()
@@ -76,5 +121,20 @@ public class Run
 		list.add(o);
 	}
 	
-	
+	public static void addGroup(Animal a) throws IllegalArgumentException
+	{
+		Group o = null;
+		if(a.isCarnivorous())
+		{
+			o = new Pack(a);
+		}else if(a.isHerbivorous())
+		{
+			o = new Herd(a);
+		}else
+		{
+			throw new IllegalArgumentException("Ajout d'un animal non autorisé");
+		}
+		
+		list.add(o);
+	}
 }

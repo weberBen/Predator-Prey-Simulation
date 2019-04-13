@@ -82,31 +82,28 @@ public abstract class Group implements I_Living
 	public abstract double getNeedsToEat();	
 	public abstract int getSize();
 	public abstract void setDeath();
+	public abstract void setDeathRandom();
 	public abstract void setDeath(Group o);
-	public abstract void setDeath(int number);
+	
+	
+	public void setDeath(int number)
+	{
+		if(number>getSize())
+		{
+			setDeath();
+			return;
+		}
+		
+		for(int i=0; i<number; i++)
+		{
+			setDeathRandom();
+		}
+	}
+	
 	
 	public void interact(Group o)
 	{
 		
-		if(this.isFamilyMember())//père ou mère par exemple
-		{
-			if(o.isFamilyMember())
-			{
-				
-			}else if(o.isAnimal())
-			{
-				
-			}else if(o.isPack())
-			{
-				
-			}else if(o.isHerd())
-			{
-				
-			}
-		}else if(o.isAnimal())
-		{
-			
-		}
 	}
 	
 	public boolean fight(Group o)
@@ -123,15 +120,16 @@ public abstract class Group implements I_Living
 	protected abstract boolean _fight(Herd o);
 	
 	public abstract void findFood(Cell[][] map);
+	public abstract void comeBack(Cell[][] map);
 	
 	public void move(Cell[][] map)
 	{
 		if(needToEat())
 		{
 			findFood(map);
-		}else if (false)
+		}else
 		{
-			
+			comeBack(map);
 		}
 	}
 	

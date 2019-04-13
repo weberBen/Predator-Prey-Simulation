@@ -35,6 +35,8 @@ public abstract class Animal extends ObjectMap implements I_Living
 	protected double effectiveAgility;
 	protected double effectiveAgressivity;
 
+	/*faire naitre les animaux au "niveau 3" avec un peu d'age*/
+	
 	public Animal()
 	{
 		ID = count;
@@ -58,6 +60,28 @@ public abstract class Animal extends ObjectMap implements I_Living
 	public boolean needToEat()
 	{
 		return getNeedsToEat()!=0;
+	}
+	
+	public String toString()
+	{
+		String type = isHerbivorous()?"Herbivore": "Carnivore";
+		return "Animal(id="+ID+", type="+type+")";
+	}
+
+	public Cell getZoneLive() {
+		return zoneLive;
+	}
+
+	public void setZoneLive(Cell zoneLive) {
+		this.zoneLive = zoneLive;
+	}
+
+	public boolean isMale() {
+		return isMale;
+	}
+
+	public void setEscaping(boolean isEscaping) {
+		this.isEscaping = isEscaping;
 	}
 	
 	//constructeur par copie
@@ -87,6 +111,8 @@ public abstract class Animal extends ObjectMap implements I_Living
 
 	public void setAgressivity(double a) {this.effectiveAgressivity = a;}
 	public double getAgressivity() {return effectiveAgressivity;}
+	
+	
 
 	public String getSpecie() {return specie;}
 
@@ -111,8 +137,8 @@ public abstract class Animal extends ObjectMap implements I_Living
 
 	public void move(double dir)
 	{
-		x+=Math.cos(direction)*(Parms.DELTA_MOVE+getStrength());
-		y+=Math.sin(direction)*(Parms.DELTA_MOVE+getStrength());
+		x+=Math.cos(dir)*(Parms.DELTA_MOVE+getStrength());
+		y+=Math.sin(dir)*(Parms.DELTA_MOVE+getStrength());
 	}
 	
 	public void move(Cell[][] map)
@@ -158,7 +184,14 @@ public abstract class Animal extends ObjectMap implements I_Living
 		return (this instanceof Herbivorous);
 	}
 	
-	public abstract void eat(Cell[][] map);
+	protected abstract void eat(Cell[][] map);
+	
+	public void eat(Cell[][] map, double dir)
+	{
+		setCanEat(true);
+		move(map, dir);
+		setCanEat(false);
+	}
 	
 	public Cell getCell(Cell[][] map)
 	{ 
@@ -215,9 +248,5 @@ public abstract class Animal extends ObjectMap implements I_Living
 		}
 	}
 	
-	public String toString()
-	{
-		String type = isHerbivorous()?"Herbivore": "Carnivore";
-		return "Animal(id="+ID+", type="+type+")";
-	}
+	
 }

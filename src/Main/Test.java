@@ -44,22 +44,6 @@ public class Test
 		}
 	}
 	
-	public void test1()
-	{
-		list.add(new Carnivorous());
-		list.add(new Carnivorous());
-		list.add(new Carnivorous());
-		
-		Run.addGroup(list.get(0));
-		Run.addGroup(list.get(1));
-		Run.addGroup(list.get(2));
-	}
-	
-	public void test2()
-	{
-		Run.removeGroup(list.get(1));
-	}
-	
 	private static void main(String[] args)
 	{
 		ArrayList<Animal> animals = new ArrayList<Animal>();
@@ -78,10 +62,10 @@ public class Test
     			{
     				if(Math.random()<0.5)
     				{
-    					map[i][j].addAnimals(new Pack(new Herbivorous()));
+    					//map[i][j].addAnimals(new Pack(new Herbivorous()));
     				}else
     				{
-    					map[i][j].addAnimals(new Pack(new Carnivorous()));
+    					//map[i][j].addAnimals(new Pack(new Carnivorous()));
     				}
     			}
     			

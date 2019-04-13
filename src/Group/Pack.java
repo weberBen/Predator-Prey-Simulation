@@ -13,6 +13,10 @@ public class Pack extends Group
 	public Family chiefFamily;
 	public ArrayList<Group> others;
 	
+	/* Une meute part chasser en groupe avec tout le monde mais seul les "pères" de chaque famille paritcipent au combat
+	 * Cela se justifie par le fait que les enfant naissent à un état assez developpé, donc qu'il apprend à chasser avec les autres
+	 */
+	
 	public Pack()
 	{
 		super();
@@ -21,9 +25,15 @@ public class Pack extends Group
 		others = new ArrayList<Group>();
 	}
 	
-	public Pack(Animal a)//a single animal is consider as a pack of one animal
+	public Pack(Animal a) throws IllegalArgumentException
 	{
+		//a single animal is consider as a pack of one animal
 		this();
+		if(!a.isCarnivorous())
+		{
+			throw new IllegalArgumentException("Le membre de la meute n'est pas reconnu comme type autorisé");
+		}
+		
 		chief = a;
 		chiefFamily = null;
 	}
@@ -42,8 +52,9 @@ public class Pack extends Group
 			//only single animal and family can be a member of the pack
 			if(o.isAnimal() || o.isFamily())
 			{
-				count+=o.getSize();
-			}else
+				count+=o.getSize();//return only the size of the father if the family is not together
+			}
+			else
 			{
 				throw new IllegalArgumentException("Le membre de la meute n'est pas reconnu comme type autorisé");
 			}
@@ -96,8 +107,7 @@ public class Pack extends Group
 		if(o.isFamily())
 		{
 			Family f = (Family)o;
-			Run.removeGroup(f.getFather());
-			Run.removeGroup(f.getMother());
+			Run.removeGroup(f);
 		}else
 		{
 			Run.removeGroup(o);
@@ -131,7 +141,7 @@ public class Pack extends Group
 			if(o.isFamily())
 			{
 				Family f = (Family)o;
-				Animal a = f.getFather().getChief();
+				Animal a = f.getFather();
 				
 				chief = a;
 				chiefFamily = f;
@@ -179,10 +189,10 @@ public class Pack extends Group
 		}else if(o.isFamily())
 		{
 			Family f = (Family)o;
-			Pack father = f.getFather();
+			Animal father = f.getFather();
 			if(father!=null)
 			{
-				if(father.getChief()==chief)
+				if(father==chief)
 				{
 					Family temp = chiefFamily;
 					setDeathForChief();//chief's family will be added to the list of members
@@ -217,26 +227,51 @@ public class Pack extends Group
 		Run.removeGroup(this);
 	}
 	
-	public void setDeath(int number)
+	public void setDeathRandom()
 	{
-		if(number>getSize())
+		int index = -1 + (int)(Math.random()*(others.size()+1));//-1 is for the chief
+		if(index==-1)
 		{
-			int size = others.size();
-			Group o;
-			for(int i=size-1; i>=0; i--)
+			/* setDeathRandom could kill the father of the family which is a 
+			 * problem when the chief of the family is also the chief of the current pack
+			 * To solve that problem we deal with the "father" and the "mother" of the family
+			 * without having to call setDeathRandom() for the family
+			 */
+			if(chiefFamily!=null && 0!=(int)(Math.random()*chiefFamily.getSize()))
 			{
-				o = others.get(i);
-				if(o.isAnimal())
-				{
-					others.remove(i);
-				}else if(o.isFamily())
-				{
-					
-				}
+				chiefFamily.setDeathRandom();
+			}else
+			{
+				setDeathForChief();
 			}
-			
-			setDeathForChief();//need to be after the loop of the group (to set the new chief)
 		}
+		setDeath(others.get(index));
+	}
+	
+	private int getNewChief()
+	{
+		//fin the animal with the highest strength
+		int index = 0;
+		double max_strength = -1;
+		double temp;
+		Group o;
+		
+		for(int i=0; i<others.size(); i++)
+		{
+			o = others.get(i);
+			if(o.isAnimal() || o.isFamily())
+			{
+				if((temp = o.getStrength())>max_strength)
+				{
+					index = i;
+					max_strength = temp;
+				}
+			}else
+			{
+				throw new IllegalArgumentException("Le membre de la meute n'est pas reconnu comme type autorisé");
+			}
+		}
+		return index;
 	}
 	
 	private void setDeathForChief() throws IllegalArgumentException
@@ -259,35 +294,16 @@ public class Pack extends Group
 		
 		if(others.size()>0)//set the new chief as the animal with the highest strength
 		{
-			//fin the animal with the highest strength
-			int index = 0;
-			double max_strength = -1;
-			double temp;
-			Group o;
 			
-			for(int i=0; i<others.size(); i++)
-			{
-				o = others.get(i);
-				if(o.isAnimal() || o.isFamily())
-				{
-					if((temp = o.getStrength())>max_strength)
-					{
-						index = i;
-						max_strength = temp;
-					}
-				}else
-				{
-					throw new IllegalArgumentException("Le membre de la meute n'est pas reconnu comme type autorisé");
-				}
-			}
-			
+			int index = getNewChief();
+			Group o = others.get(index);
 			
 			//set the new chief
-			o = others.get(index);
+			
 			if(o.isFamily())
 			{
 				Family f = (Family)o;
-				Animal a = f.getFather().getChief();
+				Animal a = f.getFather();
 				
 				chief = a;
 				chiefFamily = f;
@@ -341,19 +357,18 @@ public class Pack extends Group
 	public void splitFamily(Family f)
 	{
 		//remove family without killing animals in it
-		Pack g = f.getFather();
-		if(g!=null)
+		Animal a = f.getFather();
+		if(a!=null)
 		{
-			Animal father = f.getFather().getChief();
-			if(father!=chief)
+			if(a!=chief)
 			{
-					others.add(g);
+					others.add(new Pack(a));
 			}
 		}
 		
-		g = f.getMother();
-		if(g!=null)
-			others.add(g);
+		a = f.getMother();
+		if(a!=null)
+			others.add(new Pack(a));
 		
 		others.remove(f);
 	}
@@ -361,7 +376,7 @@ public class Pack extends Group
 	//implement
 	public double getStrength() throws IllegalArgumentException
 	{
-		double res = (chief!=null)?(chief.getStrength()):0;
+		double res = (chiefFamily!=null)?(chiefFamily.getStrength()):chief.getStrength();
 		for(Group o : others)
 		{
 			if(o.isFamily() || o.isAnimal())
@@ -382,16 +397,20 @@ public class Pack extends Group
 		
 		for(Group o : others)
 		{
-			if(o.isFamily() || o.isAnimal())
+			if(o.isAnimal())
 			{
 				res+=o.getAgility();
+			}
+			else if(o.isFamily())
+			{
+				res+=((Family)o).getFather().getAgility();
 			}else
 			{
 				throw new IllegalArgumentException("Le membre de la meute n'est pas reconnu comme type autorisé"); 
 			}
 		}
 		
-		return res/( ((chief!=null)?1:0) + others.size());
+		return res/( ((chief!=null)?1:0) + others.size() );
 	}
 	
 	
@@ -444,7 +463,10 @@ public class Pack extends Group
 	
 	public void age()
 	{
-		if(chief!=null)
+		if(chiefFamily!=null)
+		{
+			chiefFamily.age();
+		}else if(chief!=null)
 		{
 			chief.age();
 		}
@@ -457,6 +479,10 @@ public class Pack extends Group
 	
 	public boolean needToEat()
 	{
+		if(chiefFamily!=null)
+		{
+			return chiefFamily.needToEat();
+		}
 		return chief.needToEat();
 	}
 	
@@ -465,11 +491,14 @@ public class Pack extends Group
 		double output = 0;
 		
 		//check if each animal need to eat, if so, add the amount of needs to the sum
-		if(chief.needToEat())
+		
+		if(chiefFamily!=null)
+		{
+			output+=chiefFamily.getNeedsToEat();
+		}else if(chief!=null)
 		{
 			output+=chief.getNeedsToEat();
 		}
-		
 		
 		for(Group o : others)
 		{
@@ -482,35 +511,54 @@ public class Pack extends Group
 			}
 		}
 		
-		return Math.abs(output);
+		return output;
 		//if the animal need to eat, then the value of the need will be negative, so we use the absolute value of the sum
 	}
 	
 	public boolean isCarnivorous()
 	{
-		return chief.isCarnivorous();
+		return true;
 	}
 	
 	public boolean isHerbivorous()
 	{
-		return chief.isHerbivorous();
+		return false;
 	}
+	
+	public void comeBack(Cell map[][])
+	{
+		
+	}
+	
 	
 	public void findFood(Cell[][] map)
 	{
+		
 		double angle = Parms.getDirectionForAnimal(map, chief);
+
+		eat(map, angle);
+	}
+	
+	public void eat(Cell[][] map, double angle)
+	{
+		if(chiefFamily!=null)
+		{
+			chiefFamily.eat(map, angle);
+		}else if(chief!=null)
+		{
+			chief.eat(map, angle);
+		}
 		
 		for(Group o : others)
 		{
 			if(o.isAnimal())
 			{
 				Animal a = ((Pack)o).getChief();
-				a.setCanEat(true);
-				a.move(map, angle);
-				a.setCanEat(false);
+				a.eat(map, angle);
 			}else if(o.isFamily())
 			{
-				
+				Family f = (Family)o;
+				f.eat(map, angle);
 			}
 		}
 	}

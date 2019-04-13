@@ -28,12 +28,12 @@ public class Cell extends ObjectMap
 		this(0);
 	}
 	
-	public void addAnimals(Group o)
+	public void addGroup(Group o)
 	{
 		animals.add(o);
 	}
 	
-	public void removeAnimals(Group o)
+	public void removeGroup(Group o)
 	{
 		animals.remove(o);
 	}

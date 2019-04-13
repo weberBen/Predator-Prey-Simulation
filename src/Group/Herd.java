@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import Animal.Animal;
 import Parameters.Parms;
 import Cell.*;
+import Main.*;
 
 public class Herd extends Group
 {
@@ -17,15 +18,30 @@ public class Herd extends Group
 		members = new ArrayList<Animal>();
 	}
 	
-	public void add(Group o) throws IllegalArgumentException 
+	public Herd(Animal a) throws IllegalArgumentException
 	{
-		if(!o.isAnimal())
+		//an hebivorous is considered as a herd of one animal
+		this();
+		if(!a.isHerbivorous())
 		{
 			throw new IllegalArgumentException("Le membre de la meute n'est pas reconnu comme type autorisé");
 		}
 		
-		Pack p = (Pack)o;
-		addAnimal(p.getChief());
+		addAnimal(a);
+	}
+	
+	public void add(Group o) throws IllegalArgumentException 
+	{
+		if(o.isHerd())
+		{
+			addHerd((Herd)o);
+		}else if(o.isFamily())
+		{
+			addFamily((Family)o);
+		}else
+		{
+			throw new IllegalArgumentException("Le membre de la meute n'est pas reconnu comme type autorisé");
+		}
 	}
 	
 	private void addAnimal(Animal a)
@@ -33,20 +49,32 @@ public class Herd extends Group
 		members.add(a);
 	}
 	
-	public void merge(Herd herd)
+	private void addFamily(Family f)
 	{
-		for(Animal a : herd.members)
-		{
-			members.add(a);
-		}
+		members.add(f.getFather());
+		members.add(f.getMother());
+		members.addAll(f.getChildren());
+		Run.removeGroup(f);
+	}
+	
+	private void addHerd(Herd herd)
+	{
+		members.addAll(herd.members);
+		Run.removeGroup(herd);
+	}
+	
+	public void setDeath()
+	{
+		members.clear();
+		Run.removeGroup(this);
 	}
 	
 	public void setDeath(Group o)
 	{
-		if(o!=null && o.isAnimal())
+		if(o!=null && o.isHerd())
 		{
-			Pack p = (Pack)o;
-			Animal a = p.getChief();
+			Herd h = (Herd)o;
+			Animal a = h.members.get(0);
 			setDeath(a);
 		}
 	}
@@ -54,22 +82,16 @@ public class Herd extends Group
 	public void setDeath(Animal a)
 	{
 		members.remove(a);
+		if(members.size()==0)
+		{
+			Run.removeGroup(this);
+		}
 	}
 	
-	public void setDeath(int number)
+	public void setDeathRandom()
 	{
-		if(number>getSize())
-		{
-			
-		}
-		
-		for(int i=0; i<number; i++)
-		{
-			if(i<getSize())
-			{
-				
-			}
-		}
+		int index = (int)(Math.random()*members.size());
+		setDeath(members.get(index));
 	}
 	
 	public int getSize()
@@ -199,9 +221,8 @@ public class Herd extends Group
 		}
 	}
 	
-	public void setDeath()
-	{
-		members.clear();
+	public void comeBack(Cell[][] map){
+		//les troupeaux se déplacent toujours ensembles et sont nomades
 	}
 	
 	public boolean _fight(Herd o)

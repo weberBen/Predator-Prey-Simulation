@@ -1,5 +1,5 @@
 package Group;
-
+import java.util.ArrayList;
 import Animal.Animal;
 import Cell.Cell;
 import Parameters.Parms;
@@ -7,9 +7,9 @@ import Main.*;
 
 public class Family extends Group
 {
-	private Pack g_father;
-	private Pack g_mother;
-	private Animal caller;
+	private Animal father;
+	private Animal mother;
+	private ArrayList<Animal> children;
 	
 	private Family(){};
 	
@@ -17,18 +17,17 @@ public class Family extends Group
 	{
 		super();
 		
-		if(g_father==null || g_mother==null)
-			throw new IllegalArgumentException("Un des parents de la famille est nul");
+		if(!g_father.isAnimal() || !g_mother.isAnimal())
+			throw new IllegalArgumentException("Group incompatible avec une famille");
 		
 		setFather(g_father);
 		setMother(g_mother);
 		addChildren();
 	}
 	
-	private void addChildren()//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	private void addChildren()
 	{
-		Animal mother = g_mother.getChief();
-		int numChildren = 1+ (int)(1 + Math.random()*(mother.NB_POSSIBLE_KID));
+		int numChildren = (int)(1 + Math.random()*(mother.NB_POSSIBLE_KID));
 		
 		Animal a;
 		Pack p;
@@ -36,142 +35,160 @@ public class Family extends Group
 		for(int i=0; i<numChildren; i++)
 		{
 			a = mother.createChild();
-			p = new Pack(a);
-			addChild(p);
+			addChild(a);
 		}
 	}
-	
-	public void setCaller(Animal caller)
+
+	private void addChild(Animal a)
 	{
-		this.caller = caller;
+		children.add(a);
 	}
+	
+	
 	
 	//animal in charge of food
 	private void setFather(Pack o)//remove later
 	{
-		g_father = o;
-		g_father.setGroup(this);
+		father = ((Pack)o).getChief();
 	}
 	
-	public Pack getFather()
+	public Animal getFather()
 	{
-		return g_father;
+		return father;
 	}
 	
 	//animal in charge of children
+	
 	private void setMother(Pack o)
 	{
-		g_mother = o;
-		g_mother.setGroup(this);
+		mother = ((Pack)o).getChief();
 	}
 	
-	public Pack getMother()
+	public Animal getMother()
 	{
-		return g_mother;
+		return mother;
 	}
 	
-	//children
-	private void addChild(Group o)
+	
+	public ArrayList<Animal> getChildren()
 	{
-		g_mother.add(o);
+		return new ArrayList<Animal>(children);
 	}
 	
 	//implement interface
 	public double getStrength()
 	{
 		double res = 0;
-		if(g_father!=null)
+		if(father!=null)
 		{
-			res+=g_father.getStrength();
+			res+=father.getStrength();
 		}
 		
-		if(g_mother!=null)
+		if(mother!=null)
 		{
-			res+=g_mother.getStrength();
+			res+=mother.getStrength();
+		}
+		
+		for(Animal a : children)
+		{
+			res+=a.getStrength();
 		}
 		
 		return res;
 	}
 	
+
 	public double getSociability()
 	{
 		double res = 0;
-		if(g_father!=null)
+		int count = 0;
+		if(father!=null)
 		{
-			res+=g_father.getStrength();
+			res+= father.getSociability();
+			count++;
 		}
 		
-		if(g_mother!=null)
+		if(mother!=null)
 		{
-			res+=g_mother.getStrength();
+			res+=mother.getSociability();
+			count++;
 		}
 		
-		return res;
+		return res/count;
 	}
 	
+
 	public double getAgility()
 	{
 		double res = 0;
-		if(g_father!=null)
+		int count=0;
+		if(father!=null)
 		{
-			res+=g_father.getStrength();
+			res+=father.getAgility();
+			count++;
 		}
 		
-		if(g_mother!=null)
+		if(mother!=null)
 		{
-			res+=g_mother.getStrength();
+			res+=mother.getAgility();
+			count++;
 		}
 		
-		return res;
+		for(Animal a : children)
+		{
+			res+=a.getAgility();
+			count++;
+		}
+		
+		return res/count;
 	}
+	
 	
 	public double getAgressivity()
 	{
 		double res = 0;
-		if(g_father!=null)
+		int count = 0;
+		if(father!=null)
 		{
-			res+=g_father.getStrength();
+			res+=father.getAgressivity();
+			count++;
 		}
 		
-		if(g_mother!=null)
+		if(mother!=null)
 		{
-			res+=g_mother.getStrength();
+			res+=mother.getAgressivity();
+			count++;
 		}
 		
-		return res;
+		return res/count;
 	}
+	
 	
 	public String getSpecie()
 	{
-		return g_father.getSpecie();
+		return father.getSpecie();
 	}
+	
 	
 	public void age()
 	{//verifier si enfant trop grand (comme pere mere ou "enfant" =>plus de mineur dans la famille) on la split
 		//si enfant trop grand on le sort de la famille
-		if(g_father!=null)
+		if(father!=null)
 		{
-			g_father.age();
+			father.age();
 		}
 		
-		if(g_mother!=null)
+		if(mother!=null)
 		{
-			g_mother.age();
+			mother.age();
+		}
+		
+		for(Animal a : children)
+		{
+			a.age();
 		}
 	}
 	
-	public void setDeath(int number)
-	{
-		
-	}
-	
-	public boolean isTogether()
-	{
-		Animal father = g_father.getChief();
-		Animal mother = g_mother.getChief();
-		
-		return false;
-	}
 	
 	
 	//extends
@@ -185,192 +202,184 @@ public class Family extends Group
 		double output = 0;
 		
 		//check if each animal need to eat, if so, add the amount of needs to the sum
-		if(g_father!=null && g_father.needToEat())
+		if(father!=null && father.needToEat())
 		{
-			output+=g_father.getNeedsToEat();
+			output+=father.getNeedsToEat();
 		}
 		
-		if(g_mother!=null && g_mother.needToEat())
+		if(mother!=null && mother.needToEat())
 		{
-			output+=g_mother.getNeedsToEat();
+			output+=mother.getNeedsToEat();
 		}
 		
-		return (output<0)?Math.abs(output):0;
+		for(Animal a : children)
+		{
+			if(a.needToEat())
+			{
+				output+=a.getNeedsToEat();
+			}
+		}
+		
+		return output;
 		//if the animal need to eat, then the value of the need will be negative, so we use the absolute value of the sum
-	}
-	
-	public void setDeath()
-	{	
-		if(g_mother!=null)
-		{
-			g_mother.clear();
-		}
-		g_mother.setGroup(null);
-		g_father.setGroup(null);
-	
-		Pack temp_f = g_father;
-		Pack temp_m = g_mother;
-		
-		g_mother = null;
-		g_father = null;
-		if(getGroup()!=null)
-		{
-			Pack p = (Pack)getGroup();
-			p.splitFamily(this);
-		}else
-		{
-			Run.removeGroup(temp_f);
-			Run.removeGroup(temp_m);
-		}
-	}
-	
-	
-	public void setDeath(Group o)
-	{
-		if(g_father!=null && o==g_father)
-		{
-			setDeathForFather();
-		}else if(g_mother!=null && o==g_mother)
-		{
-			setDeathForMother();
-		}else 
-		{
-			setDeathForChild(o);
-		}
-		
-		
-		if(g_father!=null && g_father.getSize()==0)
-		{
-			Pack temp1 = g_father;
-			Pack temp2 = g_mother;
-			
-			g_father = null;
-			g_mother = null;
-			
-			if(getGroup()!=null)//family is part of an other group
-			{
-				Pack p = (Pack)getGroup();
-				p.splitFamily(this);
-			}else//family is a stand alone group
-			{
-				Run.removeGroup(temp1);
-				Run.removeGroup(temp2);
-			}
-		}else if(g_mother !=null && g_mother.getSize()<=1)
-		{
-			g_father.setGroup(null);
-			g_mother.setGroup(null);
-			
-			Pack temp = g_mother;
-			if(temp.getSize()==0)
-			{
-				g_mother = null;
-			}
-			
-			if(getGroup()!=null)//family is part of an other group
-			{
-				Pack p = (Pack)getGroup();
-				p.splitFamily(this);
-			}else//family is a stand alone group
-			{
-				if(temp.getSize()==0)
-				{
-					/* If the children of the family is not old enough, then we don't split
-					 * the family because the children need to be protected
-					 * (otherwise, if there is no more children in the family we split it)
-					 */
-					Run.removeGroup(temp);
-				}
-			}
-			
-		}else if(g_mother==null && g_father==null)
-		{
-			if(getGroup()!=null)//family is part of an other group
-			{
-				Pack p = (Pack)getGroup();
-				p.splitFamily(this);
-			}
-		}
-		
-	}
-	
-	private void setDeathForFather()
-	{
-		if(g_father != null)
-		{
-			g_father.setChief(g_mother);//the mother become the father
-		}else
-		{
-			g_father = new Pack(g_mother);
-		}
-		Animal mother = g_mother.getChief();
-		g_mother.setDeath(new Pack(mother));
-	}
-	
-	private void setDeathForMother()
-	{
-		g_mother.setDeath(new Pack(g_mother.getChief()));
-	}
-	
-	private void setDeathForChild(Group o)
-	{
-		g_mother.setDeath(o);
 	}
 	
 	public int getSize()
 	{
 		int count = 0;
-		if(g_father!=null)
+		if(father!=null)
 		{
 			count++;
 		}
 		
-		if(g_mother!=null)
+		if(mother!=null)
 		{
-			count+= g_mother.getSize();
+			count++;
 		}
 		
-		return count;
+		return count + children.size();
+	}	
+	
+
+	public void setDeathRandom()
+	{
+		int index = (int)(Math.random()*getSize());
+		if(index==0)
+		{
+			setDeathForFather();
+		}else if(index==1)
+		{
+			setDeathForMother();
+		}else
+		{
+			children.remove(index-2);
+		}
+		
+		manageIntegrity();
+	}
+	
+	
+	public void setDeath()
+	{	
+		if(getGroup()!=null)
+		{
+			father = null;
+			mother = null;
+			
+			Pack p = (Pack)getGroup();
+			p.splitFamily(this);
+		}else
+		{
+			Run.removeGroup(this);
+		}
+	}
+	
+	public void setDeath(Animal a)
+	{
+		if(a==father)
+		{
+			setDeathForFather();
+		}else if(a==mother)
+		{
+			setDeathForMother();
+		}else 
+		{
+			setDeathForChild(a);
+		}
+		
+		manageIntegrity();
+	}
+	
+	
+	public void setDeath(Group o)
+	{
+		if(!o.isAnimal())
+			return;
+		
+		Animal a = ((Pack)o).getChief();
+		setDeath(a);
+	}
+	
+	
+	private void setDeathForFather()
+	{
+		father = mother;
+		setDeathForMother();
+	}
+	
+	
+	private void setDeathForMother()
+	{
+		if(children.size()==0)
+		{
+			mother = null;
+			return ;
+		}
+		
+		int index = getNewMother();
+		mother = children.get(index);
+		children.remove(index);
+	}
+	
+	
+	private void setDeathForChild(Animal a)
+	{
+		children.remove(a);
+	}
+	
+	
+	private int getNewMother()
+	{
+		double max_strength = -1;
+		double temp;
+		int index = -1;
+		
+		for(int i=0; i<children.size(); i++)
+		{
+			Animal a = children.get(i);
+			if((temp=a.getStrength())>max_strength)
+			{
+				max_strength = temp;
+				index = i;
+			}
+		}
+		
+		return index;
 	}
 	
 	public boolean isCarnivorous()
 	{
-		return g_father.getChief().isCarnivorous();
+		return father.isCarnivorous();
 	}
+	
 	
 	public boolean isHerbivorous()
 	{
-		return g_father.getChief().isHerbivorous();
+		return father.isHerbivorous();
+	}
+
+	public void findFood(Cell[][] map)
+	{
+		double angle = Parms.getDirectionForAnimal(map, father);
+		eat(map, angle);
 	}
 	
-	public void interact(Group p)
+	public void eat(Cell[][] map, double dir)
+	{
+		father.eat(map, dir);
+		mother.eat(map, dir);
+		for(Animal a : children)
+		{
+			a.eat(map, dir);
+			a.moveTo(mother.getX(), mother.getY());//children go back with the mother
+		}
+	}
+	
+	
+	public void comeBack(Cell[][] map)
 	{
 		
 	}
-	
-	public void evoluateFather(Cell[][] map)
-	{
-		/* si la famille a faim alors le père part cherche de la nouriture
-		 * S'il est à proximité de sa famille alors sa force est celle de tous les membres de sa famille
-		 * Sinon sa force est la sienne
-		 */
-	}
-	
-	public void evoluateMother(Cell[][] map)
-	{
-		/* si la famille a faim alors le père part cherche de la nouriture
-		 * S'il est à proximité de sa famille alors sa force est celle de tous les membres de sa famille
-		 * Sinon sa force est la sienne
-		 */
-	}
-	
-	public void findFood(Cell[][] map)
-	{
-		Animal father = g_father.getChief();
-		if(father==null)
-			return;
-	}
-	
 	
 	public boolean _fight(Pack o)
 	{
@@ -382,12 +391,53 @@ public class Family extends Group
 		return false;
 	}
 	
+	private void manageIntegrity()
+	{
+		if(father==null)
+		{
+			if(getGroup()!=null)//family is part of an other group
+			{
+				father = null;
+				mother = null;
+				Pack p = (Pack)getGroup();
+				p.splitFamily(this);
+			}else//family is a stand alone group
+			{
+				Run.removeGroup(this);
+			}
+		}else if(mother==null)
+		{
+			if(getGroup()!=null)//family is part of an other group
+			{
+				mother = null;
+				Pack p = (Pack)getGroup();
+				p.splitFamily(this);
+			}else//family is a stand alone group
+			{
+				Run.addGroup(father);
+				Run.removeGroup(this);
+			}	
+		}else if(children.size()==0)
+		{
+			if(getGroup()!=null)//family is part of an other group
+			{
+				Pack p = (Pack)getGroup();
+				p.splitFamily(this);
+			}else//family is a stand alone group
+			{
+				Run.addGroup(father);
+				Run.addGroup(mother);
+				Run.removeGroup(this);
+			}
+		}
+	}
+	
 	public String toString()
 	{
 		String res ="";
 		res+="Famille : \n";
-		res+="\tPère : " + g_father.getChief().toString();
-		res+="\n\tMère : " + g_mother.toString();
+		res+="\tPère : " + father.toString();
+		res+="\n\tMère : " + mother.toString();
 		
 		return res;
 	}

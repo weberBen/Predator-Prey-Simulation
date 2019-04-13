@@ -22,7 +22,7 @@ public final class Parms
 	
 	public static boolean AnimalNeedToEat(double needs)
 	{
-		return needs>=0;
+		return needs>0;
 	}
 	
 	public static double sociabilityPack(int number_element)
@@ -70,5 +70,6 @@ public final class Parms
 		 */	
 		return 0;
 	}
+	
 	
 }
