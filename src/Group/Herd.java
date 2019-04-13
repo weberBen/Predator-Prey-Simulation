@@ -30,6 +30,14 @@ public class Herd extends Group
 		addAnimal(a);
 	}
 	
+	public Animal _getAnimal()
+	{
+		if(members.size()!=1)
+			return null;
+		
+		return members.get(0);
+	}
+	
 	public void add(Group o) throws IllegalArgumentException 
 	{
 		if(o.isHerd())
@@ -51,8 +59,8 @@ public class Herd extends Group
 	
 	private void addFamily(Family f)
 	{
-		members.add(f.getFather());
-		members.add(f.getMother());
+		members.add(((Herd)f.getFather()).getAnimal());
+		members.add(((Herd)f.getMother()).getAnimal());
 		members.addAll(f.getChildren());
 		Run.removeGroup(f);
 	}
@@ -88,10 +96,24 @@ public class Herd extends Group
 		}
 	}
 	
-	public void setDeathRandom()
+	private void setDeathRandom()
 	{
 		int index = (int)(Math.random()*members.size());
 		setDeath(members.get(index));
+	}
+	
+	public void setDeath(int number)
+	{
+		if(number>getSize())
+		{
+			setDeath();
+			return;
+		}
+		
+		for(int i=0; i<number; i++)
+		{
+			setDeathRandom();
+		}
 	}
 	
 	public int getSize()

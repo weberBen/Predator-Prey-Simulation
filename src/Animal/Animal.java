@@ -198,6 +198,10 @@ public abstract class Animal extends ObjectMap implements I_Living
 		return map[(int)x][(int)y];
 	}
 	
+	public Animal duel(Animal a)
+	{
+		return null;
+	}
 	
 	public void fight(Group o)
 	{

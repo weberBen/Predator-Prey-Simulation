@@ -62,9 +62,21 @@ public abstract class Group implements I_Living
 	
 	public boolean isAnimal()
 	{
-		return isPack() && getSize()==1;
+		return (isPack() || isHerd()) && getSize()==1;
 	}
 	
+	public Animal getAnimal()
+	{
+		if(!isAnimal())
+			return null;
+		
+		if(isPack())
+			return ((Pack)this).getChief();
+		if(isHerd())
+			return ((Herd)this)._getAnimal();
+		
+		return null;
+	}
 	
 	public boolean isFamilyMember()
 	{
@@ -82,24 +94,8 @@ public abstract class Group implements I_Living
 	public abstract double getNeedsToEat();	
 	public abstract int getSize();
 	public abstract void setDeath();
-	public abstract void setDeathRandom();
+	public abstract void setDeath(int number);
 	public abstract void setDeath(Group o);
-	
-	
-	public void setDeath(int number)
-	{
-		if(number>getSize())
-		{
-			setDeath();
-			return;
-		}
-		
-		for(int i=0; i<number; i++)
-		{
-			setDeathRandom();
-		}
-	}
-	
 	
 	public void interact(Group o)
 	{

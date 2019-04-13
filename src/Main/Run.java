@@ -13,57 +13,37 @@ public class Run
 	public static void main(String[] args)
 	{
 		//pack
-		
-		/*
-		ArrayList<Animal> temp_l = new ArrayList<Animal>();
-		
-		for(int i=0; i<5; i++)
+		Pack p = new Pack();
+		for(int i =0; i<5; i++)
 		{
-			Animal a = new Carnivorous();
-			temp_l.add(a);
-			list.add(new Pack(a));
+			p.add(createCarnivorous());
 		}
+		//list.add(p);
 		
-		System.out.println("-----------------------\nliste=\n"+Run._toString());
-		
-		Pack  h= new Pack();
-		ArrayList<Group> temp = new ArrayList<Group>(list);
-		for(Group o : temp)
-		{
-			h.add(o);
-		}
-		list.add(h);
-		
-		//family
-		Animal father = new Carnivorous();
-		//father.setStrength(10);//!!!!!!!!!!!!!!!!!!!!!!!! problème
-		Animal mother = new Carnivorous();
-		Pack g_father = new Pack(father);
-		Pack g_mother = new Pack(mother);
-		
-		Family f = new Family(g_father, g_mother);
-		list.add(g_father);
-		list.add(g_mother);
-		
-		h.add(f);
-		*/
-		
-		//------------------------------------------------------------------------
-		
-		 Herd h1 = createHerbivorous();
-		 Herd h2 =  createHerbivorous();
-		 Herd h3 = createHerbivorous();
-		 Herd h4 = createHerbivorous();
-		 
-		 h1.add(h2);
-		 h1.add(h3);
-		 h1.add(h4);
-		 
-		 h1.setDeath(10);
+		Herd k;
+		Family f = new Family((k=createHerbivorous()), createHerbivorous());
+		Animal a = k.getAnimal();
+		list.add(f);
 		 
 		 display();
 		 
+		 Herd h = new Herd();
+		 h.add(createHerbivorous());
+		 h.add(createHerbivorous());
+		 list.add(h);
 		 
+		 //p.add(f);
+		 h.add(f);
+		 
+		 display();
+		 
+		 Herd h2 = new Herd();
+		 h2.add(createHerbivorous());
+		 h2.add(createHerbivorous());
+		 list.add(h2);
+		 display();
+		 h.add(h2);
+		 display();
 		//Herd  h = createHerd(3);
 	}
 	
@@ -121,8 +101,8 @@ public class Run
 		list.add(o);
 	}
 	
-	public static void addGroup(Animal a) throws IllegalArgumentException
-	{
+	public static Group createGroup(Animal a, Group reference) throws IllegalArgumentException
+	{	
 		Group o = null;
 		if(a.isCarnivorous())
 		{
@@ -134,7 +114,13 @@ public class Run
 		{
 			throw new IllegalArgumentException("Ajout d'un animal non autorisé");
 		}
+		o.setGroup(reference);
 		
-		list.add(o);
+		return o;
+	}
+	
+	public static void addGroup(Animal a, Group reference)
+	{
+		list.add(createGroup(a, reference));
 	}
 }

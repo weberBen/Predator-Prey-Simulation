@@ -94,15 +94,27 @@ public class Pack extends Group
 	//the others
 	public void add(Group o) throws IllegalArgumentException
 	{
-		if(!(o.isAnimal() || o.isFamily()))
+		if(!(o.isAnimal() || o.isFamily() || o.isPack()))
 		{
 			throw new IllegalArgumentException("Le membre de la meute n'est pas reconnu comme type autorisé");
 		}
-		o.setGroup(this);
-		addGroup(o);
+		
+		if(o.isPack()) //merge two Pack
+		{
+		}else
+		{
+			o.setGroup(this);
+			addMember(o);
+		}
 	}
 	
-	private void addGroup(Group o)
+	private void merge(Pack p)
+	{
+		//Animal temp = p.duel();
+		
+	}
+	
+	private void addMember(Group o)
 	{
 		if(o.isFamily())
 		{
@@ -141,7 +153,7 @@ public class Pack extends Group
 			if(o.isFamily())
 			{
 				Family f = (Family)o;
-				Animal a = f.getFather();
+				Animal a = ((Pack)f.getFather()).getChief();
 				
 				chief = a;
 				chiefFamily = f;
@@ -189,20 +201,23 @@ public class Pack extends Group
 		}else if(o.isFamily())
 		{
 			Family f = (Family)o;
-			Animal father = f.getFather();
+			Animal father = ((Pack)f.getFather()).getChief();
 			if(father!=null)
 			{
 				if(father==chief)
 				{
-					Family temp = chiefFamily;
+					chiefFamily = null;
 					setDeathForChief();//chief's family will be added to the list of members
-					setDeathForMember(temp);//remove the chief's family
 				}else
 				{
 					setDeathForMember(o);
 				}
 			}
 		}
+		
+		if(getSize()==0)
+			Run.removeGroup(this);
+			
 	}
 	
 	
@@ -227,7 +242,7 @@ public class Pack extends Group
 		Run.removeGroup(this);
 	}
 	
-	public void setDeathRandom()
+	private void setDeathRandom()
 	{
 		int index = -1 + (int)(Math.random()*(others.size()+1));//-1 is for the chief
 		if(index==-1)
@@ -239,13 +254,36 @@ public class Pack extends Group
 			 */
 			if(chiefFamily!=null && 0!=(int)(Math.random()*chiefFamily.getSize()))
 			{
-				chiefFamily.setDeathRandom();
+				chiefFamily.setDeath(1);
 			}else
 			{
 				setDeathForChief();
 			}
+			return;
 		}
-		setDeath(others.get(index));
+		
+		Group o = others.get(index);
+		if(o.isFamily())
+		{
+			o.setDeath(1);
+			return;
+		}
+		
+		setDeath(o);
+	}
+	
+	public void setDeath(int number)
+	{
+		if(number>getSize())
+		{
+			setDeath();
+			return;
+		}
+		
+		for(int i=0; i<number; i++)
+		{
+			setDeathRandom();
+		}
 	}
 	
 	private int getNewChief()
@@ -303,7 +341,7 @@ public class Pack extends Group
 			if(o.isFamily())
 			{
 				Family f = (Family)o;
-				Animal a = f.getFather();
+				Animal a = ((Pack)f.getFather()).getChief();
 				
 				chief = a;
 				chiefFamily = f;
@@ -340,6 +378,7 @@ public class Pack extends Group
 				if(o.isFamily())
 				{
 					o.setDeath();
+					return;
 				}else if(o.isAnimal())
 				{
 					others.remove(o);
@@ -357,18 +396,23 @@ public class Pack extends Group
 	public void splitFamily(Family f)
 	{
 		//remove family without killing animals in it
-		Animal a = f.getFather();
-		if(a!=null)
+		Pack p = (Pack)f.getFather();
+		if(p!=null)
 		{
+			Animal a = p.getChief();
 			if(a!=chief)
 			{
-					others.add(new Pack(a));
+					p.setGroup(this);
+					others.add(p);
 			}
 		}
 		
-		a = f.getMother();
-		if(a!=null)
-			others.add(new Pack(a));
+		p = (Pack)f.getMother();
+		if(p!=null)
+		{
+			p.setGroup(this);
+			others.add(p);
+		}
 		
 		others.remove(f);
 	}

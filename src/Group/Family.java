@@ -13,13 +13,14 @@ public class Family extends Group
 	
 	private Family(){};
 	
-	public Family(Pack g_father, Pack g_mother) throws IllegalArgumentException
+	public Family(Group g_father, Group g_mother) throws IllegalArgumentException
 	{
 		super();
 		
 		if(!g_father.isAnimal() || !g_mother.isAnimal())
 			throw new IllegalArgumentException("Group incompatible avec une famille");
 		
+		children = new ArrayList<Animal>();
 		setFather(g_father);
 		setMother(g_mother);
 		addChildren();
@@ -27,10 +28,9 @@ public class Family extends Group
 	
 	private void addChildren()
 	{
-		int numChildren = (int)(1 + Math.random()*(mother.NB_POSSIBLE_KID));
+		int numChildren = 1;//(int)(1 + Math.random()*(mother.NB_POSSIBLE_KID));
 		
 		Animal a;
-		Pack p;
 		
 		for(int i=0; i<numChildren; i++)
 		{
@@ -47,26 +47,42 @@ public class Family extends Group
 	
 	
 	//animal in charge of food
-	private void setFather(Pack o)//remove later
+
+	private void setFather(Group o)//remove later
 	{
-		father = ((Pack)o).getChief();
+		father = o.getAnimal();
+		if(o.getGroup()==null)
+		{
+			Run.removeGroup(o);
+		}
 	}
 	
-	public Animal getFather()
+	
+	public Group getFather()
 	{
-		return father;
+		if(father==null)
+			return null;
+		
+		return Run.createGroup(father, this);
 	}
 	
 	//animal in charge of children
 	
-	private void setMother(Pack o)
+	private void setMother(Group o)
 	{
-		mother = ((Pack)o).getChief();
+		mother = o.getAnimal();
+		if(o.getGroup()==null)
+		{
+			Run.removeGroup(o);
+		}
 	}
 	
-	public Animal getMother()
+	public Group getMother()
 	{
-		return mother;
+		if(mother==null)
+			return null;
+		
+		return Run.createGroup(mother, this);
 	}
 	
 	
@@ -95,9 +111,9 @@ public class Family extends Group
 		}
 		
 		return res;
-	}
-	
+	}	
 
+	
 	public double getSociability()
 	{
 		double res = 0;
@@ -241,7 +257,7 @@ public class Family extends Group
 	}	
 	
 
-	public void setDeathRandom()
+	private void setDeathRandom()
 	{
 		int index = (int)(Math.random()*getSize());
 		if(index==0)
@@ -254,10 +270,24 @@ public class Family extends Group
 		{
 			children.remove(index-2);
 		}
+		//do not check integrety after that function (if the function is called to kill more than one member in a loop
+	}
+	
+	public void setDeath(int number)
+	{
+		if(number>getSize())
+		{
+			setDeath();
+			return;
+		}
+		
+		for(int i=0; i<number; i++)
+		{
+			setDeathRandom();
+		}
 		
 		manageIntegrity();
 	}
-	
 	
 	public void setDeath()
 	{	
@@ -414,19 +444,19 @@ public class Family extends Group
 				p.splitFamily(this);
 			}else//family is a stand alone group
 			{
-				Run.addGroup(father);
+				Run.addGroup(father, null);
 				Run.removeGroup(this);
 			}	
 		}else if(children.size()==0)
 		{
 			if(getGroup()!=null)//family is part of an other group
-			{
+			{System.out.println("oki");
 				Pack p = (Pack)getGroup();
 				p.splitFamily(this);
 			}else//family is a stand alone group
 			{
-				Run.addGroup(father);
-				Run.addGroup(mother);
+				Run.addGroup(father, null);
+				Run.addGroup(mother, null);
 				Run.removeGroup(this);
 			}
 		}
@@ -438,6 +468,11 @@ public class Family extends Group
 		res+="Famille : \n";
 		res+="\tPère : " + father.toString();
 		res+="\n\tMère : " + mother.toString();
+		res+="\n\tEnfants : ";
+		for(Animal a : children)
+		{
+			res+="\n\t\t"+a.toString();
+		}
 		
 		return res;
 	}
