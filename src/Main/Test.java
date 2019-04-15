@@ -21,30 +21,32 @@ public class Test
 		int maxObstacle = 1;
 		double numObstacles = Math.random()*maxObstacle;
 		double x, y;
-		double rigidity, height, width_ellipse, height_ellipse, rotation;
+		double rigidity, height, width, heigth, radius;
+		double actual_x, actual_y;
 		Obstacle ob;
 		
 		for(int k=0; k<numObstacles; k++)
 		{
 			//create a new obstacle for the cell
-			x = i*Parms.DIM_CELL + Math.random()*Parms.DIM_CELL;
-			y = j*Parms.DIM_CELL + Math.random()*Parms.DIM_CELL;
+			actual_x = i*Parms.DIM_CELL;
+			actual_y = j*Parms.DIM_CELL;
+			x = actual_x + Math.random()*Parms.DIM_CELL;
+			y = actual_y + Math.random()*Parms.DIM_CELL;
 			
-			height = Math.random()*Parms.MAX_HEIGHT_OBSTACLE;
-			rigidity = Math.random();
 			
-			width_ellipse = Math.random()*Obstacle.MAX_WIDTH_ELLIPSE;
-			height_ellipse = Math.random()*Obstacle.MAX_HEIGHT_ELLIPSE;
-			rotation = Math.random();
+			width = Math.random()*(actual_x + Parms.DIM_CELL-x);
+			height = Math.random()*(actual_y + Parms.DIM_CELL-y);
+			System.out.println("width="+width+"   | height="+height);
+			radius = Math.random()*(actual_x + Parms.DIM_CELL-x);
 			
-			ob = new Obstacle(x, y,rigidity, height, width_ellipse, height_ellipse, rotation);
+			ob = new Obstacle(x, y, radius);
 			//check if the new obstacle extend to other cells
 			
 			cell.addObstacle(ob);
 		}
 	}
 	
-	private static void main(String[] args)
+	public static void main(String[] args)
 	{
 		ArrayList<Animal> animals = new ArrayList<Animal>();
 		int DIM = 5;

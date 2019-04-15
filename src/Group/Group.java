@@ -2,6 +2,8 @@ package Group;
 import Parameters.Parms;
 import Cell.*;
 
+import java.util.ArrayList;
+
 import Animal.Animal;
 import Interfaces.I_Living;
 
@@ -117,6 +119,7 @@ public abstract class Group implements I_Living
 	
 	public abstract void findFood(Cell[][] map);
 	public abstract void comeBack(Cell[][] map);
+	//public abstract ArrayList<Animal> getAnimals();
 	
 	public void move(Cell[][] map)
 	{

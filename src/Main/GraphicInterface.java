@@ -10,6 +10,7 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
@@ -21,6 +22,7 @@ import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 
 import java.awt.PointerInfo;
+import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.MouseInfo;
@@ -80,6 +82,7 @@ public class GraphicInterface extends JFrame
     	}
     	
     	drawGrid(numLign, numColumn,dimX, dimY);
+
     	windowsMap.refresh();
     }
     
@@ -169,20 +172,31 @@ public class GraphicInterface extends JFrame
     	factorX =  dimX/Parms.DIM_CELL;
     	factorY =  dimY/Parms.DIM_CELL;
     	
-    	System.out.println("factorX="+factorX+"   | factorY="+factorY);
-    	
+    	System.out.println("----------------------");
     	for(Obstacle o : obstacles)
     	{
-    		oX = px + o.getX()*factorX;
-    		oY = py + o.getY()*factorY;
+    		oX = o.getX()*factorX;
+    		oY = o.getY()*factorY;
     		
-    		oDimX = o.getWidthEllipse()*factorX;
-    		oDimY = o.getHeightEllipse()*factorY;
+    		oDimX = o.getRadius2DShape()*factorX;
+    		oDimY = o.getRadius2DShape()*factorY;
+    		
+    		System.out.println("oX="+oX+"  |  oY="+oY+"   | dimX="+oDimX+"  |  "+oDimY);
+    		
     		
     		p = o.getHeight()/Parms.MAX_QUANTITY_CELL;
     		c = gradientColor(p, new Color(0,0,0), new Color(211,211,211));
     		
-    		windowsMap.drawEclipse(oX, oY, oDimX, oDimY, o.getRotation(), c);
+    		AffineTransform tx = new AffineTransform();
+    		//tx.translate((-o.getX()+oX), (-o.getY()+oY));
+    		//tx.translate(factorX, factorY);
+    	    tx.scale(factorX,factorY);
+    	    Shape s = tx.createTransformedShape(o.getShape());
+    	    
+    	    
+    	    //System.out.println("\t   | shapeHeight="+r.getHeight()+"    |  shapeWidth="+r.getWidth()+"   | x="+r.getX()+"  | y="+r.getY());
+    		//windowsMap.drawEllipse(oX, oY, oDimX, oDimY,0, c);
+    		windowsMap.drawShape(s, Color.RED);
     	}
     }
 
@@ -308,7 +322,7 @@ class MouseWheelListenerPanel extends JPanel implements MouseWheelListener
         g2.draw(r1);
     }
     
-    public void drawEclipse(double x, double y, double width, double height, double rotation, Color c)
+    public void drawEllipse(double x, double y, double width, double height, double rotation, Color c)
     {
     	//rotation in radian
     	Graphics g = img.getGraphics();
@@ -337,6 +351,16 @@ class MouseWheelListenerPanel extends JPanel implements MouseWheelListener
         g2.setPaint(c);
         
         g2.draw(r1);
+    }
+    
+    public void drawShape(Shape s, Color c)
+    {
+    	Graphics g = img.getGraphics();
+    	Graphics2D g2 = (Graphics2D) g;
+        
+    	g2.setPaint(c);
+        g2.fill(s);
+        //g2.draw(s);
     }
     
     public void paint(Graphics g){			 
