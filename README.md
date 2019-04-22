@@ -1,6 +1,6 @@
 # Predator-Prey simulation
 
-# Sommaire
+# Summary
 - [Introduction](#introduction)
 - [Interactions between agents](#intercation)
 - [Evolution of agent characteristics](#evolution_attributes)  
