@@ -52,3 +52,22 @@ The world is made of cells that represent a certain area, then inside a cell gro
 The cell also could contains obstacles that groups can avoid or pass following their attributes.
 
 ## Graphical interface <a name="graphic_interface"/>
+
+The basis graphical interface is composed the 2D-map which show alive groups , and a log area which shows interaction between groups. User can zoom in the map with the mouse wheel and move with the arrows.
+
+### Main interface :
+<img src="Documentations/Images/Main_graphicalInterface.png" width="100%"  align="middle">
+
+### Association of animals in groups :
+Animals are represented by a square with border on the map. 
+- The borders represent the type of group (Family, pack, herd)
+- The inside of the square represents the diet of the group (white for herbivorous or black for carnivorous)
+<img src="Documentations/Images/Association_groups.png" width="100%"  align="middle">
+
+### Zoom in the map :
+<img src="Documentations/Images/zoomMap.png" width="100%"  align="middle">
+
+### Evolution of the world:
+Fully filled in vegetal resources cell is represented with the color green, and an empty cell in brown
+<img src="Documentations/Images/decrease_vegetalFood.png" width="100%"  align="middle">
+
