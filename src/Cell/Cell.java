@@ -6,20 +6,32 @@ import Group.Group;
 import Group.Pack;
 import Parameters.Parms;
 
+/* A cell help us to discretise the real world. A cell represents a specif area inside which animals can move.
+ * A cell contains :
+ *   - food for herbivorous animals that decrease as ressources are reduced (because eaten). We suppose that 
+ * the distribution of the food in each cell is uniform
+ *   -  obstacles that animal could bypasses
+*/
+
 public class Cell extends ObjectMap
 {
-	private double quantity;
-	/*Représente l'énergie disponible sur la case comme nourriture*/
-	private ArrayList<Group> animals;
-	private ArrayList<Obstacle> obstacles;
+	/************************************************************************************************
+	 * 
+	 * 										ATTRIBUTES
+	 * 
+	 ************************************************************************************************/
 	
-	/* Toutes les cases sont potentiellement de la nourriture végétale avec des obstacles dessus
-	 * Et la quantity de nourriture végétale sur une case est uniforme
+	private double quantity;//ressources inside the cell
+	private ArrayList<Group> groups;//list of groups of animals
+	private ArrayList<Obstacle> obstacles;//list of obstacles
+	/* All the groups and obstacles position are given relative the the origin of the map and not to
+	 * the origin of the current cell
 	 */
+
 	public Cell(double quantity)
 	{
 		this.quantity =  quantity;
-		this.animals = new ArrayList<Group> ();
+		this.groups = new ArrayList<Group> ();
 		this.obstacles = new ArrayList<Obstacle>();
 	}
 	
@@ -28,25 +40,12 @@ public class Cell extends ObjectMap
 		this(0);
 	}
 	
-	public void addGroup(Group o)
-	{
-		animals.add(o);
-	}
 	
-	public void removeGroup(Group o)
-	{
-		animals.remove(o);
-	}
-	
-	public void addObstacle(Obstacle o)
-	{
-		obstacles.add(o);
-	}
-	
-	public void removeObstacle(Obstacle o)
-	{
-		obstacles.remove(o);
-	}
+	/************************************************************************************************
+	 * 
+	 * 										GETTER/SETTER
+	 * 
+	 ************************************************************************************************/
 	
 	public void setQuantity(double quantity)
 	{
@@ -72,6 +71,16 @@ public class Cell extends ObjectMap
 		return new ArrayList<Obstacle>(obstacles);
 	}
 	
+	public ArrayList<Group> getGroups()
+	{
+		return groups; 
+	}
+	
+	public int getNumberGroups()
+	{
+		return groups.size();
+	}
+	
 	public double getFood(double needs)
 	{
 		double food;
@@ -88,7 +97,40 @@ public class Cell extends ObjectMap
 		return food;
 	}
 	
-	public void deviateAnimal(Animal o)
+	public boolean isEatable(Group o)
+	{
+		/* The ressources on the cell is only food for herbivorous animals*/
+		return o.isHerbivorous();
+	}
+	
+	
+	/************************************************************************************************
+	 * 
+	 * 										ADD/REMOVE METHODS
+	 * 
+	 ************************************************************************************************/
+	
+	public void add(Group o)
+	{
+		groups.add(o);
+	}
+	
+	public void add(Obstacle o)
+	{
+		obstacles.add(o);
+	}
+	
+	public void remove(Group o)
+	{
+		groups.remove(o);
+	}
+	
+	public void remove(Obstacle o)
+	{
+		obstacles.remove(o);
+	}
+	
+	/*public void deviateAnimal(Animal o)
 	{
 		/* regarder la posiiton de l'obstacle et de l'animal et si pas obstacle alors rien à faire
 		 * renvoie la nouvelle direction sous forme d'angle (0 si rien à faire)
@@ -96,12 +138,6 @@ public class Cell extends ObjectMap
 		 * Si l'obstcale doit etre contouner, changer position animal
 		 * Si l'obstcale peut être franchi pop de l'animal derrière l'obstacle
 		 * Sinon ne rien faire
-		 */
-	}
-	
-	public boolean isEatable(Group o)
-	{
-		return o.isHerbivorous();
-	}
-	
+		 
+	}*/
 }

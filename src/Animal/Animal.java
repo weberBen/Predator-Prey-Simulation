@@ -1,5 +1,8 @@
 package Animal;
 import Interfaces.I_Living;
+
+import java.awt.Point;
+
 import Cell.*;
 import Group.*;
 import Parameters.*;
@@ -7,67 +10,101 @@ import Main.*;
 
 public abstract class Animal extends ObjectMap implements I_Living
 {
+	/************************************************************************************************
+	 * 
+	 * 										ATTRIBUTES
+	 * 
+	 ************************************************************************************************/
+	
 	private static int count = 0;
 	public final int ID;
 	
 	protected final String specie;
 	protected double energy;
-	protected double strength;
+	public double strength;
 	protected double agility;
 	protected double agressivity;
 	protected double sociability;
-	protected double soc;
-	protected Cell zoneFood;
-	protected int foodRadius;
 	protected Cell zoneLive;
 	protected int liveRadius;
 	protected final boolean isMale;
 	public final int NB_POSSIBLE_KID;
 	protected int age;
-	protected final int tGestation;
-	protected final int tParent;
 	protected double height;
 	protected double vision;
-	protected boolean isEscaping;
-	protected boolean canEat;
+	protected boolean isEscaping = false;
+	protected boolean canEat = false;
 	protected double direction;
 	protected double effectiveStrength;
 	protected double effectiveAgility;
 	protected double effectiveAgressivity;
-
-	/*faire naitre les animaux au "niveau 3" avec un peu d'age*/
+	public final int teenAge;
+	public final int oldAge;
+	public final int maxAge;
+	protected boolean isDead = false;
 	
 	public Animal()
 	{
 		ID = count;
 		count++;
 		
-		tParent = 0;
-		tGestation = 0;
 		NB_POSSIBLE_KID=3;
 		specie = "";
-		isMale = false;
+		isMale = Math.random()<0.5;
+		teenAge = 10;
+		oldAge = 20;
+		maxAge = 30;
+		energy = 1;
+		strength = Math.random();
+		agility = Math.random();
+		agressivity = Math.random();
+		effectiveStrength = strength;
+		effectiveAgility = agility;
+		effectiveAgressivity = agressivity;
+		age = 3;
 	}
 	
-	public abstract Animal createChild();
+	public Animal(String specie,
+			  double energy, 
+			  double strength, 
+			  double agility,
+			  double agressivity, 
+			  double sociability,
+			  Cell zoneLive,
+			  int liveRadius,
+			  int NB_POSSIBLE_KID, 
+			  int age,
+			  double height, 
+			  double vision,
+			  int teenAge,
+			  int oldAge,
+			  int maxAge)
+{
+	ID = count;
+	count++;
 	
-	public double getNeedsToEat()
-	{
-		double res = energy - Parms.hungerThreshold;
-		return (res<0)?Math.abs(res):0;
-	}
+	this.energy = energy;
+	this.specie = specie;
+	this.strength = strength;
+	this.agility = agility;
+	this.agressivity = agressivity;
+	this.sociability = sociability;
+	this.isMale = Math.random()<0.5;
+	this.NB_POSSIBLE_KID = NB_POSSIBLE_KID;
+	this.age = age;
+	this.height = height;
+	this.vision = vision;
+	this.teenAge = teenAge;
+	this.oldAge = oldAge;
+	this.maxAge = maxAge;
+}
 	
-	public boolean needToEat()
-	{
-		return getNeedsToEat()!=0;
-	}
+	/************************************************************************************************
+	 * 
+	 * 										GETTER/SETTER
+	 * 
+	 ************************************************************************************************/
 	
-	public String toString()
-	{
-		String type = isHerbivorous()?"Herbivore": "Carnivore";
-		return "Animal(id="+ID+", type="+type+")";
-	}
-
 	public Cell getZoneLive() {
 		return zoneLive;
 	}
@@ -80,83 +117,12 @@ public abstract class Animal extends ObjectMap implements I_Living
 		return isMale;
 	}
 
-	public void setEscaping(boolean isEscaping) {
+	public void setEscaping(boolean isEscaping) 
+	{
+		/*When an animal is escaping its characteristics are boosted and slowly decrease to
+		 * the normal stage. When come back to normal the animal cannot not be escaping anymore
+		*/
 		this.isEscaping = isEscaping;
-	}
-	
-	//constructeur par copie
-	public double getDir() {return direction;}
-	public void setDir(double a) {direction = a;}
-	
-	public boolean getIsEscaping() {return isEscaping;}
-	public void setIsEscaping(boolean a)  {isEscaping = a;}
-	
-	public boolean getCanEat() {return canEat;}
-	public void setCanEat(boolean a) {canEat = a;}
-	
-	public double getHeight() {return height;}
-	public void setHeight(double height) { this.height = height;}
-	
-	public double getVision() {return vision;}
-	public void setvision(double vision) { this.vision = vision;}
-	
-	public void setStrength(double a) {this.effectiveStrength = a;}
-	public double getStrength() {return effectiveStrength;}
-
-	public void setSociability(double a) {this.sociability = a;}
-	public double getSociability() {return sociability;}
-
-	public void setAgility(double a) {this.effectiveAgility = a;}
-	public double getAgility() {return effectiveAgility;}
-
-	public void setAgressivity(double a) {this.effectiveAgressivity = a;}
-	public double getAgressivity() {return effectiveAgressivity;}
-	
-	
-
-	public String getSpecie() {return specie;}
-
-	public void age() 
-	{
-		/* LA fonction est appellée à chaque itération, elle garantie le veillessement de l'animal
-		 * Si l'animal a très faim (energy en deçà d'un certain seuil criticalLifeThreshold a chaque appel de 
-		 * la fonction l'animal voie sa force, son agility décroite de manière exponentielle et son agresivité s'accroit
-		 * 
-		 * Pour un enfant, sa force et son agility augmente peu à peu jusqu'a à certain (propre a chaque espece) au delà duquel
-		 * l'age de la force et l'agility decroit peu à peu
-		 * 
-		 * Il faut deux arguments un arguments donné la valeur d'un paramètre au meilleur de la forme et un autre donnant la valeur effective 
-		 * (exemple force au meilleure de la forme et force effective qui est affecté en cas de seuil d'enrgie extreme, pour l'agility pareil
-		 * et pour l'agressivité une fois l'energie remonté au dessa du seuil revient à la normal, en fonction de l'erngie comme x) La valeur
-		 * au meilleur de la forme augmente ou diminue selon l'age
-		 * 
-		 * Lorsque les paramètres redeviennent normaux, escape = false
-		 */
-		age++;
-	}
-
-	public void move(double dir)
-	{
-		x+=Math.cos(dir)*(Parms.DELTA_MOVE+getStrength());
-		y+=Math.sin(dir)*(Parms.DELTA_MOVE+getStrength());
-	}
-	
-	public void move(Cell[][] map)
-	{
-		move(direction);
-		if(isEscaping)
-			return;
-		if(canEat)
-		{
-			eat(map);
-			return;
-		}
-	}
-	
-	public void move(Cell[][] map, double dir)
-	{
-		setDir(dir);
-		move(map);
 	}
 	
 	public void boost(double coeff)
@@ -184,7 +150,73 @@ public abstract class Animal extends ObjectMap implements I_Living
 		return (this instanceof Herbivorous);
 	}
 	
-	protected abstract void eat(Cell[][] map);
+	public Cell getCell(Cell[][] map)
+	{ 
+		Point pt = Parms.getCellCoordinate(x, y);
+		return map[pt.x][pt.y];
+	}
+	
+	public double getDir() {return direction;}
+	public void setDir(double a) {direction = a;}
+	
+	public boolean getIsEscaping() {return isEscaping;}
+	public void setIsEscaping(boolean a)  {isEscaping = a;}
+	
+	public boolean getCanEat() {return canEat;}
+	public void setCanEat(boolean a) {canEat = a;}
+	
+	public double getHeight() {return height;}
+	public void setHeight(double height) { this.height = height;}
+	
+	public double getVision() {return vision;}
+	public void setvision(double vision) { this.vision = vision;}
+	
+	public void setStrength(double a) {this.effectiveStrength = a;}
+	public double getStrength() {return effectiveStrength;}
+
+	public void setSociability(double a) {this.sociability = a;}
+	public double getSociability() {return sociability;}
+
+	public void setAgility(double a) {this.effectiveAgility = a;}
+	public double getAgility() {return effectiveAgility;}
+
+	public void setAgressivity(double a) {this.effectiveAgressivity = a;}
+	public double getAgressivity() {return effectiveAgressivity;}
+	
+	public void setEnergy(double a) {this.energy=a;}
+	public double getEnergy() {return energy;}
+	
+	public double getAge() {return age;}
+	public int getID() {return ID;}
+	public String getSpecie() {return specie;}
+	
+	public boolean isDead()
+	{
+		return (age>=maxAge||energy<=0);
+	}
+	
+	/************************************************************************************************
+	 * 
+	 * 										FOOD METHODS
+	 * 
+	 ************************************************************************************************/
+	
+	public void addToEnergy(double d)
+	{
+		setEnergy(getEnergy()+d);
+	}
+	
+	public double getNeedsToEat()
+	{
+		double res = energy - Parms.hungerThreshold;
+		return (res<0)?Math.abs(res):0;
+	}
+	
+	public boolean needToEat()
+	{
+		return getNeedsToEat()!=0;
+	}
+	
 	
 	public void eat(Cell[][] map, double dir)
 	{
@@ -193,64 +225,110 @@ public abstract class Animal extends ObjectMap implements I_Living
 		setCanEat(false);
 	}
 	
-	public Cell getCell(Cell[][] map)
-	{ 
-		return map[(int)x][(int)y];
-	}
-	
-	public Animal duel(Animal a)
+	public double setSatiety()
 	{
-		return null;
+		//the animal is fully fed
+		double res = (Math.max(0, Parms.hungerThreshold-getEnergy()));
+		setEnergy(Math.max(Parms.hungerThreshold,getEnergy()));
+		return res;
 	}
+
 	
-	public void fight(Group o)
+
+	/************************************************************************************************
+	 * 
+	 * 										UPDATE METHODS
+	 * 
+	 ************************************************************************************************/
+	
+	
+	public void age() 
 	{
-		if(o.getStrength()>getStrength())
+		/* At each iteration energy of the animal is decreased and it age increased. When the animal reach a specific age
+		 * (related to its specie) then its characteristics as its strength and agility definitely decreased. For a child these
+		 * characteristics increased until it reach teen age.
+		 * 
+		 * When the animal's characteristics are boosted then the effective characteristics (for example the effective 
+		 * strength) are increased but not the real characteristics. These effectives characteristics then slowly decrease.
+		 */
+		age++;
+		energy-=Parms.DELTA_ENERGY;
+		if (age<teenAge)
 		{
-			if(getAgility()<o.getAgility())//animal loose the fight
+			effectiveStrength+=(strength/age);
+			effectiveAgility+=agility/age;
+			strength+=(strength/age);
+			agility+=agility/age;
+		}
+		else if (age>oldAge)//old age
+		{
+			strength*=0.9;
+			agility*=0.9;
+			effectiveStrength*=0.9;
+			effectiveAgility*=0.9;
+		}
+		
+		if (energy<Parms.criticalLifeThreshold)
+		{
+			effectiveStrength*=0.75;
+			effectiveAgility*=0.75;
+			effectiveAgressivity=Math.max(1,effectiveAgressivity*1.25);
+		}
+		else if (effectiveStrength<strength*1.01)
+		{
+			effectiveStrength = (effectiveStrength+strength)/2;
+			effectiveAgility = (effectiveAgility+agility)/2;
+			effectiveAgressivity = agressivity;
+			if (isEscaping)
 			{
-				//setDeath();
-				
-			}else//animal will loose the fight
-			{
-				if(getAgressivity()>Math.random())//animal try to attack
-				{
-					//setDeath();
-				}else//animal try to escape
-				{
-					if(Math.random()<0.5)//fail to espace
-					{
-						//setDeath();
-					}else
-					{
-						escape(o.getDir());
-					}
-				}
+				isEscaping = false;
+				effectiveStrength = strength;
+				effectiveAgility = agility;
 			}
 		}
-		else
+	}
+
+	
+	
+	/************************************************************************************************
+	 * 
+	 * 										LOCATION METHODS
+	 * 
+	 ************************************************************************************************/
+	
+	public void move(double dir)
+	{
+		x+=Math.cos(dir)*(Parms.DELTA_MOVE+getStrength());
+		y+=Math.sin(dir)*(Parms.DELTA_MOVE+getStrength());
+	}
+	
+	public void move(Cell[][] map)
+	{
+		move(direction);
+		if(isEscaping)
+			return;
+		if(canEat)
 		{
-			if(getAgility()>o.getAgility())//animal loose the fight
-			{
-				o.setDeath();//all the members of the group die
-			}else//animal will loose the fight
-			{
-				if(getAgressivity()>Math.random())//animal try to attack
-				{
-					//setDeath();
-				}else//animal try to escape
-				{
-					if(Math.random()<0.5)//fail to espace
-					{
-						//setDeath();
-					}else
-					{
-						escape(o.getDir());
-					}
-				}
-			}
+			//eat(map);
+			return;
 		}
 	}
 	
+	public void move(Cell[][] map, double dir)
+	{
+		setDir(dir);
+		move(map);
+	}
+
 	
+	
+	public abstract Animal createChild(Animal father);
+	
+	
+	
+	public String toString()
+	{
+		String type = isHerbivorous()?"Herbivore": "Carnivore";
+		return "Animal(id="+ID+", type="+type+")";
+	}
 }

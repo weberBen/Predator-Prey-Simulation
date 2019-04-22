@@ -12,6 +12,8 @@ import java.awt.geom.Rectangle2D;
 
 import Parameters.*;
 
+/* An obstacle is represented as a circle given by its radius and the position of its center*/
+
 public class Obstacle extends ObjectMap
 {
 	private double rigidity;
@@ -30,7 +32,7 @@ public class Obstacle extends ObjectMap
 		this.rigidity = rigidity;
 		this.height = height;
 		this.radius = radius;
-		this.shape = new Ellipse2D.Double(x, y, radius, radius);
+		this.shape = new Ellipse2D.Double(x, y, radius/2., radius/2.);
 	}
 	
 	public Obstacle(double x, double y, double radius)
