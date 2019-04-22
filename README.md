@@ -51,6 +51,8 @@ Moreover, an animal has the possibility to espace a fight with another animal. I
 The world is made of cells that represent a certain area, then inside a cell groups can move (and groups can move to another cell). The cell help us to find faster with which group another in a cell can interact with.
 The cell also could contains obstacles that groups can avoid or pass following their attributes.
 
+In our simulation the constitution in vegetable food is supposed uniform. More animals eat on that cell, less available resources remain in it.
+
 ## Graphical interface <a name="graphic_interface"/>
 
 The basis graphical interface is composed the 2D-map which show alive groups , and a log area which shows interaction between groups. User can zoom in the map with the mouse wheel and move with the arrows.
